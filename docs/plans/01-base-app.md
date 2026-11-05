@@ -1,6 +1,6 @@
 # MapleStory Classic toolkit: base app, hosted on kevincho.ca
 
-**Status:** In progress: Steps 1–3 done (Step 3 not committed yet). Each step still needs approval before it is built. Step 6 also gets a portal-side plan doc, `kevincho.ca/docs/plans/05-maplestory-zone.md`.
+**Status:** In progress: Steps 1–4 done (Step 4 not committed yet). Each step still needs approval before it is built. Step 6 also gets a portal-side plan doc, `kevincho.ca/docs/plans/05-maplestory-zone.md`.
 
 ## Context
 Kevin plays MapleStory Classic World and wants a web app that will later hold several tools (first planned: a damage calculator and a scroll simulator). This plan covers **only the base app**, plus hooking it into Kevin's portal. The tools come later, each with its own plan.
@@ -70,7 +70,7 @@ Kevin plays MapleStory Classic World and wants a web app that will later hold se
   - **Checks:** lint, `tsc --noEmit` and `npm run build` pass.
   - **Not yet:** the starter page content stays until Step 3.
 
-### Step 3: App shell, tool registry, placeholder pages ✅ Done (not committed yet)
+### Step 3: App shell, tool registry, placeholder pages ✅ Done (commit `6a6be44`)
 - **Requirement:**
   - **Header:** a back-to-portal arrow (`<a href="/">`), "MapleStory Classic Tools", and the theme toggle.
   - **Home page:** `/maplestory` shows a grid of tool cards from `src/data/tools.ts`.
@@ -104,7 +104,7 @@ Kevin plays MapleStory Classic World and wants a web app that will later hold se
   - **Production (`next start`):** navigating home → card → page shows no console messages.
 - **Note:** in dev mode only, React logs "Encountered a script tag while rendering React component". It comes from `ThemeScript`, which is mirrored unchanged from the portal (so the portal's dev server likely logs it too). Production builds don't log it, and e2e tests run against production, so I left it as is to keep the two copies identical.
 
-### Step 4: Tests and CI ⏳ Not started
+### Step 4: Tests and CI ✅ Done (not committed yet)
 - **Requirement:**
   - Playwright e2e tests for the home grid, navigation to each placeholder, the theme toggle, the 404 page, and no horizontal scroll at 375px.
   - A GitHub Actions workflow running lint and e2e.
@@ -112,6 +112,30 @@ Kevin plays MapleStory Classic World and wants a web app that will later hold se
 - **How:**
   - Copy the portal's `playwright.config.ts` (port 3102, `baseURL` with `/maplestory`), `e2e/fixtures.ts` and `.github/workflows/e2e.yml`.
   - Add the `test:e2e` script and a CLAUDE.md section like the portal's.
+- **Changes from the plan:**
+  - **`baseURL` without the base path:** it's just the origin, and tests use full paths (`/maplestory/...`). With the base path in `baseURL`, a leading `/` in `page.goto()` would silently drop it.
+  - **Readiness URL:** Playwright's `webServer.url` waits on `/maplestory`, because `/` is a 404.
+  - **README:** rewritten too, replacing the create-next-app text with portal-style sections (how it fits together, adding a tool, development, tests, layout).
+- **Result (2026-11-04):**
+  - **Setup:** `@playwright/test@^1.64.1` (same as the portal), a `test:e2e` script, `playwright.config.ts` on port 3102, `e2e/fixtures.ts` copied unchanged, and the Playwright output folders added to `.gitignore`.
+  - **`e2e/home.spec.ts`:**
+    - the title and heading
+    - one card per tool, each linking to `/maplestory/<slug>` with its description
+    - the back arrow's href is `/`, and the app name returns to `/maplestory`
+    - theme: follows the OS, the toggle persists across reloads, and it saves under `localStorage["theme"]`
+    - no horizontal scroll at 375px on the home page and both tool pages
+  - **`e2e/tools.spec.ts`:**
+    - each tool opens from its card with the right URL, title and heading
+    - each placeholder shows "Coming soon" and links back to all tools
+    - an unknown path returns 404 with the not-found page
+  - **The 404 test's console message:** Chromium logs the page's own 404 as a console error, so that test removes exactly one copy of that message. The shared fixture stays identical to the portal's.
+  - **CI:** `.github/workflows/e2e.yml` is the portal's workflow without the submodule checkout, and runs on pushes to `main`.
+  - **`CLAUDE.md`:** covers the zone-compatibility rules (basePath, `<a>` to the portal, mirrored files) and the portal's "Verifying changes" section.
+  - **Checks:**
+    - `npm run test:e2e`: 15 passed in about 14s.
+    - lint and `tsc --noEmit` pass.
+    - The `next dev` preview kept working during e2e builds, since Next 16 keeps dev output in `.next/dev`.
+    - CI itself runs once the repo is on GitHub (Step 5).
 
 ### Step 5: Deploy the zone on its own ⏳ Not started
 - **Requirement:** The repo is on GitHub (`kevin-cho/maplestory-app`) and has a Vercel project. `https://<project>.vercel.app/maplestory` works publicly.
@@ -146,3 +170,4 @@ Kevin plays MapleStory Classic World and wants a web app that will later hold se
 - **2026-11-04**: Step 1 done: the Next.js zone is scaffolded with `basePath: "/maplestory"` on port 3002. Lint, build and types pass, and it was checked in the browser.
 - **2026-11-04**: Step 1 committed (`a40502c`). Step 2 done: the portal's theme tokens, theme script, toggle and fonts were copied, and the toggle was checked in the browser.
 - **2026-11-04**: Step 2 committed (`58824c9`). Step 3 done: the app shell, tool registry, placeholder tool pages and not-found page. It uses static per-tool folders instead of a `[tool]` route (`dynamicParams` isn't available with `cacheComponents`), and the header has no tool links (too crowded on phones).
+- **2026-11-04**: Step 3 committed (`6a6be44`). Step 4 done: Playwright e2e tests (15 passing), a CI workflow, `CLAUDE.md` and a README rewrite. Test URLs use full `/maplestory` paths rather than putting the base path in `baseURL`.
