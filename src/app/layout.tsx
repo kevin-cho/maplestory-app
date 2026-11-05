@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import { Geist_Mono, Poppins } from "next/font/google";
 import { ThemeScript } from "@/components/theme-script";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { SiteHeader } from "@/components/site-header";
 import "./globals.css";
 
-// Fonts, theme script and header mirror the kevincho.ca portal's root layout,
-// so moving between the two zones feels like one site.
+// Fonts and theme script mirror the kevincho.ca portal's root layout, so
+// moving between the two zones feels like one site.
 
 // Poppins isn't a variable font, so each weight used must be listed.
 const poppins = Poppins({
@@ -20,7 +20,11 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "MapleStory Classic Tools · Kevin Cho",
+  title: {
+    default: "MapleStory Classic Tools · Kevin Cho",
+    // Tool pages set just their name, e.g. "Damage Calculator · MapleStory…"
+    template: "%s · MapleStory Classic Tools",
+  },
   description: "Calculators and simulators for MapleStory Classic World",
 };
 
@@ -37,9 +41,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <ThemeScript />
       </head>
       <body className="min-h-full flex flex-col">
-        <header className="flex justify-end p-4">
-          <ThemeToggle />
-        </header>
+        <SiteHeader />
         {children}
       </body>
     </html>

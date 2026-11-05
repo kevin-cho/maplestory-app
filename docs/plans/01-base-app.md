@@ -1,6 +1,6 @@
 # MapleStory Classic toolkit: base app, hosted on kevincho.ca
 
-**Status:** In progress: Steps 1 and 2 done (Step 2 not committed yet). Each step still needs approval before it is built. Step 6 also gets a portal-side plan doc, `kevincho.ca/docs/plans/05-maplestory-zone.md`.
+**Status:** In progress: Steps 1–3 done (Step 3 not committed yet). Each step still needs approval before it is built. Step 6 also gets a portal-side plan doc, `kevincho.ca/docs/plans/05-maplestory-zone.md`.
 
 ## Context
 Kevin plays MapleStory Classic World and wants a web app that will later hold several tools (first planned: a damage calculator and a scroll simulator). This plan covers **only the base app**, plus hooking it into Kevin's portal. The tools come later, each with its own plan.
@@ -49,7 +49,7 @@ Kevin plays MapleStory Classic World and wants a web app that will later hold se
   - **Browser check:** `localhost:3002/maplestory` renders the starter page, and every script, font and image under `/maplestory/...` returns 200. `localhost:3002/` returns 404, as expected: the app only serves under its base path.
   - **Dev server:** left running.
 
-### Step 2: Portal look and theme ✅ Done (not committed yet)
+### Step 2: Portal look and theme ✅ Done (commit `58824c9`)
 - **Requirement:** Same colors, fonts and light/dark behaviour as the portal, including a theme toggle that shares the portal's saved choice.
 - **Why:** Hard navigation from kevincho.ca should feel like the same site.
 - **How:**
@@ -70,7 +70,7 @@ Kevin plays MapleStory Classic World and wants a web app that will later hold se
   - **Checks:** lint, `tsc --noEmit` and `npm run build` pass.
   - **Not yet:** the starter page content stays until Step 3.
 
-### Step 3: App shell, tool registry, placeholder pages ⏳ Not started
+### Step 3: App shell, tool registry, placeholder pages ✅ Done (not committed yet)
 - **Requirement:**
   - **Header:** a back-to-portal arrow (`<a href="/">`), "MapleStory Classic Tools", and the theme toggle.
   - **Home page:** `/maplestory` shows a grid of tool cards from `src/data/tools.ts`.
@@ -80,6 +80,29 @@ Kevin plays MapleStory Classic World and wants a web app that will later hold se
 - **How:**
   - Files: `src/app/layout.tsx`, `src/app/page.tsx`, `src/app/[tool]/page.tsx` with `generateStaticParams` from the registry, and `src/app/not-found.tsx`.
   - Cards use the same style as the portal's app list.
+- **Changes from the plan:**
+  - **Static folders instead of `[tool]`:** each tool has its own folder (`src/app/damage/`, `src/app/scroll/`). With `cacheComponents` on, `dynamicParams` isn't available (per the bundled Next docs), so a `[tool]` route would render unknown slugs at request time instead of returning 404. Each tool becomes a distinct page later anyway.
+  - **No tool links in the header:** the arrow, title, links and toggle don't fit at 375px. The home page lists the tools, and the app name links back to it.
+  - **Icons:** the portal's `icon.png` and `apple-icon.png` replace Next's starter favicon.
+- **Result (2026-11-04):**
+  - **Tool registry:** `src/data/tools.ts` holds `{ slug, name, description }` plus `getTool()`, which throws on a typo so the build fails.
+  - **Header (`src/components/site-header.tsx`):**
+    - The back arrow is a plain `<a href="/">` labelled "Back to kevincho.ca". Lint's `no-html-link-for-pages` rule is disabled for that one line, with a reason: it assumes `/` is a page in this app.
+    - The app name is a `next/link` to the app home.
+    - The theme toggle sits on the right.
+  - **Home page:** `/maplestory` shows a heading and a card grid with the same style as the portal's app list.
+  - **Tool pages:** `/maplestory/damage` and `/maplestory/scroll` render a shared `ComingSoon` component. Titles come from a layout template: "<Tool> · MapleStory Classic Tools".
+  - **Not found:** `not-found.tsx` returns 404 with a link back to all tools.
+  - **Cleanup:** the unused starter SVGs and the `public/` folder are removed.
+- **Checks:**
+  - Lint, `tsc --noEmit` and `npm run build` pass. All routes are static.
+  - **Browser (dev):**
+    - Cards link to `/maplestory/damage` and `/maplestory/scroll`, and the back arrow's href is `/`.
+    - Clicking a card navigates client-side, and titles are correct.
+    - `/maplestory/nope` returns 404 with the not-found page.
+    - Light, dark, and 375px wide all look right, with no horizontal scroll.
+  - **Production (`next start`):** navigating home → card → page shows no console messages.
+- **Note:** in dev mode only, React logs "Encountered a script tag while rendering React component". It comes from `ThemeScript`, which is mirrored unchanged from the portal (so the portal's dev server likely logs it too). Production builds don't log it, and e2e tests run against production, so I left it as is to keep the two copies identical.
 
 ### Step 4: Tests and CI ⏳ Not started
 - **Requirement:**
@@ -122,3 +145,4 @@ Kevin plays MapleStory Classic World and wants a web app that will later hold se
 - **2026-11-04**: Kevin asked for the app to be hosted on the kevincho.ca portal. Switched from Vite to Next.js 16.4.3 as a Multi-Zone, following the portal README. Added Steps 5 and 6 (deploy, portal integration). Plan approved.
 - **2026-11-04**: Step 1 done: the Next.js zone is scaffolded with `basePath: "/maplestory"` on port 3002. Lint, build and types pass, and it was checked in the browser.
 - **2026-11-04**: Step 1 committed (`a40502c`). Step 2 done: the portal's theme tokens, theme script, toggle and fonts were copied, and the toggle was checked in the browser.
+- **2026-11-04**: Step 2 committed (`58824c9`). Step 3 done: the app shell, tool registry, placeholder tool pages and not-found page. It uses static per-tool folders instead of a `[tool]` route (`dynamicParams` isn't available with `cacheComponents`), and the header has no tool links (too crowded on phones).
