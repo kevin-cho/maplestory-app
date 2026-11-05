@@ -1,26 +1,48 @@
+/* Mirrored from the kevincho.ca portal (kevin-cho/kevincho.ca,
+   src/app/globals.css) so both zones look the same. Keep them in sync. */
+
 @import "tailwindcss";
 
+/* `dark:` classes follow the `dark` class on <html> (set by ThemeScript)
+   instead of the OS setting, so the theme toggle can override it. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Semantic colors: each role is defined once per theme, and components use
+   the role (e.g. `text-muted-foreground`) so they work in both themes. */
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  /* Secondary text and icons */
+  --muted-foreground: var(--color-zinc-600);
+  /* Subtle surfaces, e.g. hover backgrounds */
+  --muted: var(--color-zinc-100);
+  /* Outlines, e.g. card borders */
+  --border: var(--color-zinc-200);
 }
 
+.dark {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  --muted-foreground: var(--color-zinc-400);
+  --muted: var(--color-zinc-900);
+  --border: var(--color-zinc-800);
+  /* Dark scrollbars and form controls */
+  color-scheme: dark;
+}
+
+/* Expose the roles as Tailwind colors: bg-background, text-foreground, etc. */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --font-sans: var(--font-poppins);
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
 }

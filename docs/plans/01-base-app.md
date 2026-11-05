@@ -1,6 +1,6 @@
 # MapleStory Classic toolkit: base app, hosted on kevincho.ca
 
-**Status:** In progress: Step 1 done (not committed yet). Each step still needs approval before it is built. Step 6 also gets a portal-side plan doc, `kevincho.ca/docs/plans/05-maplestory-zone.md`.
+**Status:** In progress: Steps 1 and 2 done (Step 2 not committed yet). Each step still needs approval before it is built. Step 6 also gets a portal-side plan doc, `kevincho.ca/docs/plans/05-maplestory-zone.md`.
 
 ## Context
 Kevin plays MapleStory Classic World and wants a web app that will later hold several tools (first planned: a damage calculator and a scroll simulator). This plan covers **only the base app**, plus hooking it into Kevin's portal. The tools come later, each with its own plan.
@@ -29,7 +29,7 @@ Kevin plays MapleStory Classic World and wants a web app that will later hold se
 
 ## Steps (each needs approval before it is built)
 
-### Step 1: Scaffold the zone ✅ Done (not committed yet)
+### Step 1: Scaffold the zone ✅ Done (commit `a40502c`)
 - **Requirement:**
   - A Next.js app in this folder, matching the portal's versions, with `.nvmrc` (24) and `basePath: "/maplestory"`.
   - `npm run dev` serves it at `localhost:3002/maplestory`.
@@ -49,12 +49,26 @@ Kevin plays MapleStory Classic World and wants a web app that will later hold se
   - **Browser check:** `localhost:3002/maplestory` renders the starter page, and every script, font and image under `/maplestory/...` returns 200. `localhost:3002/` returns 404, as expected: the app only serves under its base path.
   - **Dev server:** left running.
 
-### Step 2: Portal look and theme ⏳ Not started
+### Step 2: Portal look and theme ✅ Done (not committed yet)
 - **Requirement:** Same colors, fonts and light/dark behaviour as the portal, including a theme toggle that shares the portal's saved choice.
 - **Why:** Hard navigation from kevincho.ca should feel like the same site.
 - **How:**
   - Copy `globals.css` tokens, `theme-script.tsx`, `theme-toggle.tsx`, the font setup from `layout.tsx`, and the `react-icons` dependency.
   - Add a source comment noting each file is mirrored from the portal.
+- **Result (2026-11-04):**
+  - **Copied from the portal, each with a "mirrored from the portal, keep in sync" comment:**
+    - `src/app/globals.css`, identical apart from that comment (checked with `diff`)
+    - `src/components/theme-script.tsx`
+    - `src/components/theme-toggle.tsx`
+  - **Added:** `react-icons@^5.7.0`, the same range as the portal.
+  - **Layout:** `src/app/layout.tsx` now matches the portal's: Poppins + Geist Mono, `ThemeScript` in `<head>`, and a header with the toggle on the right. The title is "MapleStory Classic Tools · Kevin Cho".
+  - **Browser check:**
+    - With nothing saved it followed the OS theme (dark).
+    - Clicking the toggle switched to light and saved `localStorage["theme"] = "light"`, the same key the portal uses.
+    - The choice survived a reload, and the body font is Poppins.
+    - The test setting was cleared afterwards.
+  - **Checks:** lint, `tsc --noEmit` and `npm run build` pass.
+  - **Not yet:** the starter page content stays until Step 3.
 
 ### Step 3: App shell, tool registry, placeholder pages ⏳ Not started
 - **Requirement:**
@@ -107,3 +121,4 @@ Kevin plays MapleStory Classic World and wants a web app that will later hold se
 - **2026-11-04**: Researched data sources. There is no public Classic API: Nexon's Open API covers modern KMS/MSEA/TMS only. Kevin picked the damage calculator and scroll simulator as the first tools, then narrowed this plan to the base app only.
 - **2026-11-04**: Kevin asked for the app to be hosted on the kevincho.ca portal. Switched from Vite to Next.js 16.4.3 as a Multi-Zone, following the portal README. Added Steps 5 and 6 (deploy, portal integration). Plan approved.
 - **2026-11-04**: Step 1 done: the Next.js zone is scaffolded with `basePath: "/maplestory"` on port 3002. Lint, build and types pass, and it was checked in the browser.
+- **2026-11-04**: Step 1 committed (`a40502c`). Step 2 done: the portal's theme tokens, theme script, toggle and fonts were copied, and the toggle was checked in the browser.
