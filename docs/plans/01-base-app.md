@@ -1,6 +1,6 @@
 # MapleStory Classic toolkit: base app, hosted on kevincho.ca
 
-**Status:** In progress: Steps 1–5 done. The zone is live at `https://maplestory-app.vercel.app/maplestory`. Step 6 (portal integration) is in progress on the portal branch `maplestory-zone`. Each step still needs approval before it is built. Step 6 also gets a portal-side plan doc, `kevincho.ca/docs/plans/05-maplestory-zone.md`.
+**Status:** ✅ Done (2026-11-04): **live at https://kevincho.ca/maplestory**. The app is a Multi-Zone of the portal (kevincho.ca PR #18, merge `e737e62`). Next: plans for the tools themselves (`02-…`).
 
 ## Context
 Kevin plays MapleStory Classic World and wants a web app that will later hold several tools (first planned: a damage calculator and a scroll simulator). This plan covers **only the base app**, plus hooking it into Kevin's portal. The tools come later, each with its own plan.
@@ -156,7 +156,7 @@ Kevin plays MapleStory Classic World and wants a web app that will later hold se
     - The back arrow's href is `/`.
     - The console has no errors, only "preloaded but not used" warnings for Poppins font weights. That comes from the same `next/font` setup as the portal, and warnings don't fail the e2e fixture.
 
-### Step 6: Add it to the portal (in `kevincho.ca`, on a branch) 🚧 In progress
+### Step 6: Add it to the portal (in `kevincho.ca`, on a branch) ✅ Done (portal Plan 05; merge `e737e62`)
 - **Requirement:** `kevincho.ca/maplestory` and every subpath serve the zone. The portal home lists "MapleStory Classic Tools". The theme carries across, and the back arrow returns home.
 - **Why:** This is the goal: the app is hosted on the portal.
 - **How:**
@@ -170,6 +170,11 @@ Kevin plays MapleStory Classic World and wants a web app that will later hold se
 - **Verify:**
   - **Locally:** portal on 3000 with `.env.local` pointing at the zone on 3002, so `localhost:3000/maplestory` shows the zone.
   - **On Vercel:** first the preview, then production `kevincho.ca/maplestory` after merging. Check the theme persists across both zones.
+- **Result (2026-11-04):** full details are in the portal's `docs/plans/05-maplestory-zone.md`.
+  - **Portal changes:** `beforeFiles` rewrites driven by `MAPLESTORY_URL` (plain config in Vercel, set for Production and Preview), the `apps.ts` entry, and README updates.
+  - **Fix found on the preview:** as plain rewrites, this zone's segment prefetches 404ed (both apps mapped them), so the rewrites moved to `beforeFiles`.
+  - **PR and production:** PR #18 passed its checks and was merged.
+  - **Production check:** kevincho.ca shows the app card, `/maplestory` and the tool pages load through the portal with every prefetch returning 200 and no failed requests, and the theme carries both ways.
 
 ## Verification (every step)
 - Lint, `tsc --noEmit` and `npm run build` pass. From Step 4 on, `npm run test:e2e` passes too.
@@ -186,3 +191,4 @@ Kevin plays MapleStory Classic World and wants a web app that will later hold se
 - **2026-11-04**: Step 4 committed (`767de08`). Step 5 done: the public GitHub repo `kevin-cho/maplestory-app` was created and `main` pushed, and the first CI run passed. Kevin imported it into Vercel, and production `https://maplestory-app.vercel.app/maplestory` was checked in the browser.
 - **2026-11-04**: Step 5's doc update committed (`4d4771f`). Step 6 started in the portal on branch `maplestory-zone`, tracked in its `docs/plans/05-maplestory-zone.md`. Rewrites, the app entry and the README are built and verified locally (portal on 3000 proxying to this zone on 3002, with the theme carrying across), and portal lint and e2e pass. Next: set `MAPLESTORY_URL` in Vercel, then the preview and production checks.
 - **2026-11-04**: Portal branch `maplestory-zone` pushed (`29c8103`). On the Vercel preview, this zone's segment prefetches returned 404 through the portal, because the portal's routing mapped them before forwarding and this zone mapped them again. Kevin chose to fix it in the portal by making the rewrites `beforeFiles` (`a5f2d8a`). On the preview, all prefetches now return 200. Details in the portal's Plan 05. Next: PR, merge, production check.
+- **2026-11-04**: Step 6 done. Portal PR #18 was merged (`e737e62`), and https://kevincho.ca/maplestory was verified in production. Plan 01 complete.
