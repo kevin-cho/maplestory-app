@@ -1,6 +1,6 @@
 # MapleStory Classic toolkit: base app, hosted on kevincho.ca
 
-**Status:** In progress: Steps 1–4 done (Step 4 not committed yet). Each step still needs approval before it is built. Step 6 also gets a portal-side plan doc, `kevincho.ca/docs/plans/05-maplestory-zone.md`.
+**Status:** In progress: Steps 1–5 done. The zone is live at `https://maplestory-app.vercel.app/maplestory`. Next: Step 6 (portal integration). Each step still needs approval before it is built. Step 6 also gets a portal-side plan doc, `kevincho.ca/docs/plans/05-maplestory-zone.md`.
 
 ## Context
 Kevin plays MapleStory Classic World and wants a web app that will later hold several tools (first planned: a damage calculator and a scroll simulator). This plan covers **only the base app**, plus hooking it into Kevin's portal. The tools come later, each with its own plan.
@@ -104,7 +104,7 @@ Kevin plays MapleStory Classic World and wants a web app that will later hold se
   - **Production (`next start`):** navigating home → card → page shows no console messages.
 - **Note:** in dev mode only, React logs "Encountered a script tag while rendering React component". It comes from `ThemeScript`, which is mirrored unchanged from the portal (so the portal's dev server likely logs it too). Production builds don't log it, and e2e tests run against production, so I left it as is to keep the two copies identical.
 
-### Step 4: Tests and CI ✅ Done (not committed yet)
+### Step 4: Tests and CI ✅ Done (commit `767de08`)
 - **Requirement:**
   - Playwright e2e tests for the home grid, navigation to each placeholder, the theme toggle, the 404 page, and no horizontal scroll at 375px.
   - A GitHub Actions workflow running lint and e2e.
@@ -137,12 +137,24 @@ Kevin plays MapleStory Classic World and wants a web app that will later hold se
     - The `next dev` preview kept working during e2e builds, since Next 16 keeps dev output in `.next/dev`.
     - CI itself runs once the repo is on GitHub (Step 5).
 
-### Step 5: Deploy the zone on its own ⏳ Not started
+### Step 5: Deploy the zone on its own ✅ Done
 - **Requirement:** The repo is on GitHub (`kevin-cho/maplestory-app`) and has a Vercel project. `https://<project>.vercel.app/maplestory` works publicly.
 - **Why:** The portal can only proxy to a deployed zone.
 - **How:**
   - **Kevin:** creates the GitHub repo (or approves `gh repo create`) and imports it in Vercel. Vercel production URLs are public; previews need login.
   - **Claude:** pushes only with your OK, then checks the production URL in the browser pane.
+- **Result (2026-11-04):**
+  - **GitHub:** Kevin chose a public repo. `gh repo create kevin-cho/maplestory-app --public --source . --push` created it and pushed `main` (commits `a40502c` to `767de08`): https://github.com/kevin-cho/maplestory-app
+  - **First CI run:** lint and 15 e2e tests passed in about 1.5 minutes ([run 41940559296](https://github.com/kevin-cho/maplestory-app/actions/runs/41940559296)).
+  - **Vercel:** Kevin imported the repo as project `maplestory-app` (team `kevin-cho`) with default settings, and the Vercel status on `main` is success.
+  - **Production domain:** `https://maplestory-app.vercel.app`, which is public.
+    - `/maplestory` returns 200, and `/` returns 404 as expected.
+    - The team domain `maplestory-app-kevin-cho.vercel.app` redirects to a Vercel login (deployment protection), so the portal must point at `maplestory-app.vercel.app`.
+  - **Browser check:**
+    - The home page title, heading and fonts are correct, and the cards link to `/maplestory/damage` and `/maplestory/scroll`.
+    - Clicking a card opens the tool page client-side.
+    - The back arrow's href is `/`.
+    - The console has no errors, only "preloaded but not used" warnings for Poppins font weights. That comes from the same `next/font` setup as the portal, and warnings don't fail the e2e fixture.
 
 ### Step 6: Add it to the portal (in `kevincho.ca`, on a branch) ⏳ Not started
 - **Requirement:** `kevincho.ca/maplestory` and every subpath serve the zone. The portal home lists "MapleStory Classic Tools". The theme carries across, and the back arrow returns home.
@@ -171,3 +183,4 @@ Kevin plays MapleStory Classic World and wants a web app that will later hold se
 - **2026-11-04**: Step 1 committed (`a40502c`). Step 2 done: the portal's theme tokens, theme script, toggle and fonts were copied, and the toggle was checked in the browser.
 - **2026-11-04**: Step 2 committed (`58824c9`). Step 3 done: the app shell, tool registry, placeholder tool pages and not-found page. It uses static per-tool folders instead of a `[tool]` route (`dynamicParams` isn't available with `cacheComponents`), and the header has no tool links (too crowded on phones).
 - **2026-11-04**: Step 3 committed (`6a6be44`). Step 4 done: Playwright e2e tests (15 passing), a CI workflow, `CLAUDE.md` and a README rewrite. Test URLs use full `/maplestory` paths rather than putting the base path in `baseURL`.
+- **2026-11-04**: Step 4 committed (`767de08`). Step 5 done: the public GitHub repo `kevin-cho/maplestory-app` was created and `main` pushed, and the first CI run passed. Kevin imported it into Vercel, and production `https://maplestory-app.vercel.app/maplestory` was checked in the browser.
