@@ -1,6 +1,6 @@
 # MapleStory mouse cursor
 
-**Status:** 🔍 In review: [PR #1](https://github.com/kevin-cho/maplestory-app/pull/1) from branch `maple-cursor`. All steps are built. Next: CI, Kevin's review, and the merge.
+**Status:** ✅ Done (2026-11-07): [PR #1](https://github.com/kevin-cho/maplestory-app/pull/1) merged into `main` (merge commit `860105c`). The MapleStory cursor is live across the app.
 
 ## Context
 Kevin wants the app's mouse cursor to match the in-game MapleStory one, with three states:
@@ -184,3 +184,4 @@ The GMS v270 frames below were decoded and checked by eye. All of them match Kev
 - 2026-11-07: Kevin saw the hover frames shift. Measured the cause (hotspot rounding with different frame sizes) and added Step 2c.
 - 2026-11-07: Step 2c built: padded frames with shared, even hotspots. All 23 e2e tests pass.
 - 2026-11-07: Steps 2–2c committed (`8147a71`). Step 3: pushed `maple-cursor` and opened PR #1.
+- 2026-11-07: Plan doc update committed (`c0c16d8`). PR #1 merged with a merge commit (`860105c`), keeping the step commit hashes above valid.
