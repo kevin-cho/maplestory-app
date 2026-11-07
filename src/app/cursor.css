@@ -1,0 +1,111 @@
+/*
+ * MapleStory's in-game mouse cursor (Plan 02). App-only: kept out of
+ * globals.css, which mirrors the kevincho.ca portal's copy.
+ *
+ * Images come from scripts/fetch-cursors.mjs. CSS url() doesn't get the
+ * basePath added automatically, so /maplestory is written out. The two numbers
+ * after each image are the hotspot (the pixel that clicks). The script pads
+ * each frame so the game's anchor point lands on it, keeping both hover frames
+ * aligned, and keeps them even so the 2x halves are whole numbers (Chrome
+ * rounds hotspots). `auto`/`pointer` is the fallback if an image fails.
+ *
+ * Each cursor is declared twice:
+ * - url(): one image pixel per CSS pixel. A fallback for browsers without
+ *   image-set() in `cursor`.
+ * - image-set() with a 2x entry: on a high-density (Retina) screen, one image
+ *   pixel per *screen* pixel, the size the game draws it. Without this the
+ *   cursor is doubled and blurry. The hotspot is halved to match, since it's
+ *   measured in CSS pixels. 1× screens pick the 1x entry, the same as url().
+ *
+ * These rules are unlayered, so they win over Tailwind's layered utilities
+ * such as `cursor-pointer`.
+ */
+
+/* Default: the static pointing finger. `cursor` is inherited, so this covers
+   the whole page. Text fields set it too, or browsers switch to the I-beam. */
+html,
+input,
+textarea,
+[contenteditable="true"] {
+  cursor: url("/maplestory/cursors/default.png") 0 4, auto;
+  cursor: image-set(
+        url("/maplestory/cursors/default.png") 1x,
+        url("/maplestory/cursors/default.png") 2x
+      )
+      0 2,
+    auto;
+}
+
+/* Clickable things: the finger plus a mouse, alternating every 500 ms (the
+   game's frame delay). An animation overrides plain declarations, so this
+   wins over any `cursor` set on these elements, including the rule above. */
+:where(
+    a[href],
+    button:not(:disabled),
+    [role="button"],
+    summary,
+    label[for],
+    select,
+    input:is([type="checkbox"], [type="radio"], [type="submit"], [type="button"], [type="reset"]),
+    .cursor-pointer
+  ) {
+  animation: maple-cursor-hover 1s step-end infinite;
+}
+
+@keyframes maple-cursor-hover {
+  0% {
+    cursor: url("/maplestory/cursors/hover-1.png") 4 6, pointer;
+    cursor: image-set(
+          url("/maplestory/cursors/hover-1.png") 1x,
+          url("/maplestory/cursors/hover-1.png") 2x
+        )
+        2 3,
+      pointer;
+  }
+  50% {
+    cursor: url("/maplestory/cursors/hover-2.png") 4 6, pointer;
+    cursor: image-set(
+          url("/maplestory/cursors/hover-2.png") 1x,
+          url("/maplestory/cursors/hover-2.png") 2x
+        )
+        2 3,
+      pointer;
+  }
+}
+
+/* Mouse held down: the pressing finger, anywhere on the page. CursorPress sets
+   the attribute. !important is needed to beat the hover animation. */
+html[data-mouse-down],
+html[data-mouse-down] * {
+  cursor: url("/maplestory/cursors/pressed.png") 4 2, auto !important;
+  cursor: image-set(
+        url("/maplestory/cursors/pressed.png") 1x,
+        url("/maplestory/cursors/pressed.png") 2x
+      )
+      2 1,
+    auto !important;
+}
+
+/* No flicker for people who ask for less motion: hover keeps the first frame.
+   :is() (not :where()) so checkboxes beat the plain `input` rule above. */
+@media (prefers-reduced-motion: reduce) {
+  :is(
+      a[href],
+      button:not(:disabled),
+      [role="button"],
+      summary,
+      label[for],
+      select,
+      input:is([type="checkbox"], [type="radio"], [type="submit"], [type="button"], [type="reset"]),
+      .cursor-pointer
+    ) {
+    animation: none;
+    cursor: url("/maplestory/cursors/hover-1.png") 4 6, pointer;
+    cursor: image-set(
+          url("/maplestory/cursors/hover-1.png") 1x,
+          url("/maplestory/cursors/hover-1.png") 2x
+        )
+        2 3,
+      pointer;
+  }
+}
