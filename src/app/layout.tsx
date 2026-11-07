@@ -2,7 +2,10 @@ import type { Metadata } from "next";
 import { Geist_Mono, Poppins } from "next/font/google";
 import { ThemeScript } from "@/components/theme-script";
 import { SiteHeader } from "@/components/site-header";
+import { CursorPress } from "@/components/cursor-press";
 import "./globals.css";
+// After globals.css: the MapleStory cursor is this app's own, not the portal's
+import "./cursor.css";
 
 // Fonts and theme script mirror the kevincho.ca portal's root layout, so
 // moving between the two zones feels like one site.
@@ -41,6 +44,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <ThemeScript />
       </head>
       <body className="min-h-full flex flex-col">
+        <CursorPress />
         <SiteHeader />
         {children}
       </body>
