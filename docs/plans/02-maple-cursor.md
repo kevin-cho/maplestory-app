@@ -1,6 +1,6 @@
 # MapleStory mouse cursor
 
-**Status:** 🚧 In progress on branch `maple-cursor`. Steps 1–2 are built (Step 2 not committed yet). Step 2b is built too. Step 2c is built too. Next: Kevin checks the hover animation, then Step 3 (push and open a PR).
+**Status:** 🔍 In review: [PR #1](https://github.com/kevin-cho/maplestory-app/pull/1) from branch `maple-cursor`. All steps are built. Next: CI, Kevin's review, and the merge.
 
 ## Context
 Kevin wants the app's mouse cursor to match the in-game MapleStory one, with three states:
@@ -50,7 +50,7 @@ The GMS v270 frames below were decoded and checked by eye. All of them match Kev
   - The 4 PNGs are byte-identical to the frames checked by eye during planning.
   - `eslint scripts/` is clean.
 
-### Step 2: Apply the cursor with CSS, plus a press listener ✅ Done
+### Step 2: Apply the cursor with CSS, plus a press listener ✅ Done (commit `8147a71`, together with 2b and 2c)
 - **Requirement:** All three states work across the app.
 - **Why:** This is the feature itself.
 - **How:**
@@ -80,7 +80,7 @@ The GMS v270 frames below were decoded and checked by eye. All of them match Kev
   - Still to check by hand (Kevin): how it feels in Chrome and Safari.
   - A side effect, faithful to the game: plain text shows the finger rather than an I-beam, though it can still be selected.
 
-### Step 2b: Smaller, sharper cursor, and the finger in text fields ✅ Done
+### Step 2b: Smaller, sharper cursor, and the finger in text fields ✅ Done (commit `8147a71`)
 - **Requirement:**
   - The cursor is smaller and crisp on Kevin's Retina screen.
   - Text fields show the default finger instead of the I-beam.
@@ -115,7 +115,7 @@ The GMS v270 frames below were decoded and checked by eye. All of them match Kev
   - All 22 e2e tests pass, and lint and `tsc` are clean. The dev preview shows the new rules.
   - Still to check by hand (Kevin): the size and sharpness on Retina, and that clicks land at the fingertip.
 
-### Step 2c: Keep the hover frames aligned ✅ Done
+### Step 2c: Keep the hover frames aligned ✅ Done (commit `8147a71`)
 - **Requirement:** in the hover animation, the mouse icon stays put between the two frames, and only the finger moves, as in game.
 - **Why:** Kevin sees the mouse icon shifting between the frames.
 - **Cause (measured):**
@@ -144,7 +144,7 @@ The GMS v270 frames below were decoded and checked by eye. All of them match Kev
     - All 23 e2e tests pass, and lint and `tsc` are clean.
     - The dev preview shows the new whole-number hotspots.
 
-### Step 3: Push the branch and open a PR ⏳ Not started
+### Step 3: Push the branch and open a PR ✅ Done
 - **Requirement:** A GitHub PR from `maple-cursor` into `main`.
 - **Why:** Kevin wants this feature reviewed and merged through a PR. CI (lint + e2e) runs on it, and Vercel builds a preview deployment.
 - **How:**
@@ -153,6 +153,12 @@ The GMS v270 frames below were decoded and checked by eye. All of them match Kev
     - No Claude attribution in the PR or the commits.
   - Then check the PR's CI result.
   - Update the plan doc with the PR link and the step commits' hashes.
+- **Result:**
+  - Pushed `maple-cursor` and opened [PR #1](https://github.com/kevin-cho/maplestory-app/pull/1). Its description has a manual-check list for the cursor states.
+  - When this doc was updated, CI had 1 check passing and 1 still running.
+  - **Finding on caching:** while testing Step 2c, hot reload swapped the CSS but the browser kept the old images. Old images with new hotspots looked misaligned until a hard reload.
+    - This doesn't affect visitors, since only the final images get deployed.
+    - If the images change after launch, add a version query (e.g. `?v=2`) to their URLs.
 
 ## Verification
 - `npm run test:e2e` (with nvm loaded) passes, including the new `cursor.spec.ts`.
@@ -177,3 +183,4 @@ The GMS v270 frames below were decoded and checked by eye. All of them match Kev
 - 2026-11-07: Step 2b built (2× `image-set()`, the finger in text fields). All 22 e2e tests pass.
 - 2026-11-07: Kevin saw the hover frames shift. Measured the cause (hotspot rounding with different frame sizes) and added Step 2c.
 - 2026-11-07: Step 2c built: padded frames with shared, even hotspots. All 23 e2e tests pass.
+- 2026-11-07: Steps 2–2c committed (`8147a71`). Step 3: pushed `maple-cursor` and opened PR #1.
