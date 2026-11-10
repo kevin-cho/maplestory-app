@@ -73,6 +73,53 @@ textarea,
   }
 }
 
+/* Draggable things, like inventory items (Plan 04): add the `cursor-grab`
+   class. The hand loops open → half → closed → half, with the game's frame
+   delays (250, 100, 200, 100 ms). The class selector beats the :where() above,
+   so this wins on a button or link too. All grab frames share hotspot 6 8. */
+.cursor-grab {
+  animation: maple-cursor-grab 650ms step-end infinite;
+}
+
+@keyframes maple-cursor-grab {
+  0% {
+    cursor: url("/maplestory/cursors/grab-open.png") 6 8, grab;
+    cursor: image-set(
+          url("/maplestory/cursors/grab-open.png") 1x,
+          url("/maplestory/cursors/grab-open.png") 2x
+        )
+        3 4,
+      grab;
+  }
+  38.462% {
+    cursor: url("/maplestory/cursors/grab-half.png") 6 8, grab;
+    cursor: image-set(
+          url("/maplestory/cursors/grab-half.png") 1x,
+          url("/maplestory/cursors/grab-half.png") 2x
+        )
+        3 4,
+      grab;
+  }
+  53.846% {
+    cursor: url("/maplestory/cursors/grab-close.png") 6 8, grab;
+    cursor: image-set(
+          url("/maplestory/cursors/grab-close.png") 1x,
+          url("/maplestory/cursors/grab-close.png") 2x
+        )
+        3 4,
+      grab;
+  }
+  84.615% {
+    cursor: url("/maplestory/cursors/grab-half.png") 6 8, grab;
+    cursor: image-set(
+          url("/maplestory/cursors/grab-half.png") 1x,
+          url("/maplestory/cursors/grab-half.png") 2x
+        )
+        3 4,
+      grab;
+  }
+}
+
 /* Mouse held down: the pressing finger, anywhere on the page. CursorPress sets
    the attribute. !important is needed to beat the hover animation. */
 html[data-mouse-down],
@@ -84,6 +131,35 @@ html[data-mouse-down] * {
       )
       2 1,
     auto !important;
+}
+
+/* Pressing on a draggable item grabs it: the closed hand, not the pressing
+   finger, so there's no flash of the finger between hovering and holding.
+   One more class than the pressed rule above, so it wins. */
+html[data-mouse-down] .cursor-grab,
+html[data-mouse-down] .cursor-grab * {
+  cursor: url("/maplestory/cursors/grab-close.png") 6 8, grabbing !important;
+  cursor: image-set(
+        url("/maplestory/cursors/grab-close.png") 1x,
+        url("/maplestory/cursors/grab-close.png") 2x
+      )
+      3 4,
+    grabbing !important;
+}
+
+/* Holding an item: add `cursor-grabbing` to <html> while an item is attached
+   to the cursor. The closed hand shows everywhere, even with the button down,
+   as in the game: same specificity as the pressed rule and later, so it wins.
+   It's the grab animation's closed frame, so picking up doesn't move it. */
+html.cursor-grabbing,
+html.cursor-grabbing * {
+  cursor: url("/maplestory/cursors/grab-close.png") 6 8, grabbing !important;
+  cursor: image-set(
+        url("/maplestory/cursors/grab-close.png") 1x,
+        url("/maplestory/cursors/grab-close.png") 2x
+      )
+      3 4,
+    grabbing !important;
 }
 
 /* No flicker for people who ask for less motion: hover keeps the first frame.
@@ -107,5 +183,18 @@ html[data-mouse-down] * {
         )
         2 3,
       pointer;
+  }
+
+  /* Grab keeps the open hand. `html .cursor-grab` matches the specificity of
+     `button:not(:disabled)` above and comes later, so it wins on buttons. */
+  html .cursor-grab {
+    animation: none;
+    cursor: url("/maplestory/cursors/grab-open.png") 6 8, grab;
+    cursor: image-set(
+          url("/maplestory/cursors/grab-open.png") 1x,
+          url("/maplestory/cursors/grab-open.png") 2x
+        )
+        3 4,
+      grab;
   }
 }

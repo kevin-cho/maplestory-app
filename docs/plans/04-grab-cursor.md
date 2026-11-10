@@ -1,6 +1,6 @@
 # Grab and holding cursors
 
-**Status:** 🚧 In progress on branch `grab-cursor`. Step 1 is done (not committed yet). Next: Step 2, waiting for approval.
+**Status:** 🚧 In progress on branch `grab-cursor`. Steps 1–2 are done (Step 2 not committed yet). Next: Kevin tries it on the dev preview, then Step 3 (push and open a PR).
 
 ## Context
 In MapleStory, hovering an inventory item animates the cursor into a grabbing hand. After you click the item it's attached to the cursor, and the cursor stays a static fist while you move it. Kevin wants both cursors ready for the app's future inventory UI, such as the scroll simulator.
@@ -29,7 +29,7 @@ I surveyed states 2–16 on a contact sheet. The others are dice, house, gift, r
 
 ## Steps (each needs approval before it is built)
 
-### Step 1: Branch, plan doc, fetch the frames ✅ Done
+### Step 1: Branch, plan doc, fetch the frames ✅ Done (commit `f2d2400`)
 - **Requirement:**
   - A `grab-cursor` branch and this doc.
   - The grab and holding frames in `public/cursors/`, made by `fetch-cursors.mjs`.
@@ -47,7 +47,7 @@ I surveyed states 2–16 on a contact sheet. The others are dice, house, gift, r
   - The guard was tested with a deliberately wrong `sameAs` (5/0). It stopped with "5/0 no longer matches 5/1: give it its own entry in FRAMES", exit code 1, and wrote nothing.
   - `eslint scripts/` is clean.
 
-### Step 2: CSS, tests and docs ⏳ Waiting for approval
+### Step 2: CSS, tests and docs ✅ Done
 - **Requirement:**
   - Elements with `cursor-grab` show the looping grab animation.
   - While `<html>` has `cursor-grabbing`, the fist shows everywhere.
@@ -68,6 +68,24 @@ I surveyed states 2–16 on a contact sheet. The others are dice, house, gift, r
     These use stand-in elements, since there's no inventory yet.
   - **README:** a short note on the two classes.
 - **Check:** lint, `tsc` and the e2e tests. Then Kevin tries it on the dev preview with a temporary test element.
+- **Result:**
+  - **`cursor.css`:**
+    - the `maple-cursor-grab` keyframes (650 ms, step-end) on `.cursor-grab`,
+    - the `html.cursor-grabbing` holding rule after the pressed rule,
+    - 2× `image-set()` with hotspot `3 4`,
+    - the reduced-motion open hand. That uses `html .cursor-grab`, so it also beats the reduced-motion hover rule on buttons.
+    - The fallback keywords are `grab` and `grabbing`, so even without the images the cursor still means the right thing.
+  - **e2e:** 4 new tests in a "grab and holding" group, plus the grab images in the served-images and shared-canvas tests.
+    - The tests check a stand-in `<div>` and a `<button>` with `cursor-grab`, holding on the body, item and link, holding beating a mouse press, and the reduced-motion open hand.
+    - All 27 tests pass, and lint and `tsc` are clean.
+  - **Dev preview:** sampled the computed cursor every 10 ms. It goes open (~250 ms) → half (100) → closed (200) → half (100) and loops every 650 ms, matching the game's delays.
+    - With `cursor-grabbing` on `<html>`, a link shows the closed hand. All three images load with a 200.
+  - **README:** the cursor bullet now explains the automatic states and the two classes for draggable items and held items.
+  - **Fix after Kevin tried it:** clicking an item flashed the pressing finger before the closed hand. While the button was down, the page-wide pressed rule beat the grab animation; the item only switched to holding on `click`.
+    - New rule `html[data-mouse-down] .cursor-grab` (and the same for its descendants) shows the closed hand while pressing on a grab item. It has one more class than the pressed rule, so it wins. Pressing elsewhere still shows the pressing finger, as in the game.
+    - The new e2e test "pressing on an item shows the closed hand" makes 28 in total, all passing. The stand-in items got text so they have a size to hover.
+    - In the preview, pressing on an item now gives `grab-close` (it was `pressed`), and the body still shows `pressed`.
+  - **Still to check by hand (Kevin):** the feel in his browser, using a DevTools snippet that adds a stand-in item. Click it to pick it up, and click elsewhere to drop it.
 
 ### Step 3: Push and open a PR ⏳ Not started
 
@@ -84,3 +102,5 @@ I surveyed states 2–16 on a contact sheet. The others are dice, house, gift, r
 - 2026-11-10: Plan drafted. Found the grab (state 5) and holding (state 11) cursors and checked them on a contact sheet.
 - 2026-11-10: Step 1 done: frames fetched and aligned. Two game frames are shared, so 3 files cover 5 frames, with a `sameAs` guard.
 - 2026-11-10: Renamed `fist` to `grab-close` at Kevin's request (briefly `grab-fist`), so all three grab images share the prefix and pair with `grab-open`. Same image, byte-identical.
+- 2026-11-10: Step 1 committed (`f2d2400`). Step 2 done: CSS, 4 new e2e tests (27 pass) and a README note. The animation timing was checked in the preview.
+- 2026-11-10: Kevin saw the pressing finger flash when clicking an item. Pressing on a grab item now shows the closed hand.
