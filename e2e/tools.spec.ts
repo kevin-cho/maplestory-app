@@ -1,6 +1,10 @@
 import { tools } from "@/data/tools";
 import { expect, test } from "./fixtures";
 
+// Tools with a real page (no "Coming soon"). The Scroll Simulator shows the
+// inventory windows so far (e2e/inventory.spec.ts).
+const BUILT = new Set(["scroll"]);
+
 for (const tool of tools) {
   test.describe(tool.name, () => {
     test("opens from its card on the home page", async ({ page }) => {
@@ -14,8 +18,9 @@ for (const tool of tools) {
       await expect(page.getByRole("heading", { level: 1 })).toHaveText(tool.name);
     });
 
-    // Update this test when the tool is built
+    // Tools that aren't built yet show a placeholder
     test("shows a placeholder that links back to all tools", async ({ page }) => {
+      test.skip(BUILT.has(tool.slug), "built: tested in its own spec");
       await page.goto(`/maplestory/${tool.slug}`);
       await expect(page.getByText("Coming soon")).toBeVisible();
 
