@@ -1,6 +1,6 @@
 # Grab and holding cursors
 
-**Status:** 🚧 In progress on branch `grab-cursor`. Steps 1–2 are done (Step 2 not committed yet). Next: Kevin tries it on the dev preview, then Step 3 (push and open a PR).
+**Status:** 🔍 In review: [PR #3](https://github.com/kevin-cho/maplestory-app/pull/3) from branch `grab-cursor`. All steps are done. Next: CI, Kevin's review, and the merge.
 
 ## Context
 In MapleStory, hovering an inventory item animates the cursor into a grabbing hand. After you click the item it's attached to the cursor, and the cursor stays a static fist while you move it. Kevin wants both cursors ready for the app's future inventory UI, such as the scroll simulator.
@@ -47,7 +47,7 @@ I surveyed states 2–16 on a contact sheet. The others are dice, house, gift, r
   - The guard was tested with a deliberately wrong `sameAs` (5/0). It stopped with "5/0 no longer matches 5/1: give it its own entry in FRAMES", exit code 1, and wrote nothing.
   - `eslint scripts/` is clean.
 
-### Step 2: CSS, tests and docs ✅ Done
+### Step 2: CSS, tests and docs ✅ Done (commit `4192148`)
 - **Requirement:**
   - Elements with `cursor-grab` show the looping grab animation.
   - While `<html>` has `cursor-grabbing`, the fist shows everywhere.
@@ -86,8 +86,20 @@ I surveyed states 2–16 on a contact sheet. The others are dice, house, gift, r
     - The new e2e test "pressing on an item shows the closed hand" makes 28 in total, all passing. The stand-in items got text so they have a size to hover.
     - In the preview, pressing on an item now gives `grab-close` (it was `pressed`), and the body still shows `pressed`.
   - **Still to check by hand (Kevin):** the feel in his browser, using a DevTools snippet that adds a stand-in item. Click it to pick it up, and click elsewhere to drop it.
+  - **Snippet for trying it** (DevTools Console on the dev preview, after a hard reload). It adds a stand-in item: hover it to see the grab, click it to pick it up, and click anywhere else to drop it. Reloading removes it.
+    ```js
+    const box = Object.assign(document.createElement('div'), { className: 'cursor-grab', textContent: 'Item: hover me, click to pick up' });
+    Object.assign(box.style, { position: 'fixed', top: '120px', left: '40px', padding: '24px', border: '2px dashed', background: 'Canvas' });
+    document.body.append(box);
+    box.addEventListener('click', (e) => { e.stopPropagation(); document.documentElement.classList.add('cursor-grabbing'); });
+    document.addEventListener('click', () => document.documentElement.classList.remove('cursor-grabbing'));
+    ```
+  - Kevin tried it and approved it after the press fix.
 
-### Step 3: Push and open a PR ⏳ Not started
+### Step 3: Push and open a PR ✅ Done
+- **Result:**
+  - Pushed `grab-cursor` and opened [PR #3](https://github.com/kevin-cho/maplestory-app/pull/3), with a manual-check list.
+  - When this doc was updated, CI had 1 check running.
 
 ## Verification
 - e2e tests pass. Lint and `tsc` are clean.
@@ -104,3 +116,4 @@ I surveyed states 2–16 on a contact sheet. The others are dice, house, gift, r
 - 2026-11-10: Renamed `fist` to `grab-close` at Kevin's request (briefly `grab-fist`), so all three grab images share the prefix and pair with `grab-open`. Same image, byte-identical.
 - 2026-11-10: Step 1 committed (`f2d2400`). Step 2 done: CSS, 4 new e2e tests (27 pass) and a README note. The animation timing was checked in the preview.
 - 2026-11-10: Kevin saw the pressing finger flash when clicking an item. Pressing on a grab item now shows the closed hand.
+- 2026-11-10: Step 2 committed (`4192148`). Step 3: pushed `grab-cursor` and opened PR #3. Added the DevTools snippet to Step 2.
