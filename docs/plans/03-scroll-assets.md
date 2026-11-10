@@ -1,6 +1,6 @@
 # Scroll assets: icons, data, effect frames and sounds
 
-**Status:** 🚧 In progress on branch `scroll-assets`. Steps 1–3 are done (Steps 2–3 not committed yet). All assets are downloaded and documented.
+**Status:** 🔍 In review: [PR #2](https://github.com/kevin-cho/maplestory-app/pull/2) from branch `scroll-assets`. Step 4 (review fixes) is done but not committed yet.
 
 ## Context
 Kevin wants assets ready for the future scroll simulator:
@@ -55,7 +55,7 @@ All of it comes from GMS v83 (the classic era) on maplestory.io. This only adds 
   - `fetch-cursors.mjs` now imports these. Re-running it left the four cursor PNGs byte-identical (`git status` shows no change).
   - `eslint scripts/` is clean.
 
-### Step 2: Fetch the scroll assets ✅ Done
+### Step 2: Fetch the scroll assets ✅ Done (commit `503e1ff`)
 - **Requirement:**
   - `scripts/fetch-scroll-assets.mjs` downloads everything below.
   - It prints progress and a summary, and lists any IDs that failed.
@@ -102,7 +102,7 @@ All of it comes from GMS v83 (the classic era) on maplestory.io. This only adds 
   - **Sounds:** the WZ header was 82 bytes in both. `afinfo` reads them as valid MP3 (mono, 22 kHz, 24 kbps): success 1.9 s, failure 2.2 s. Both played fine.
   - **App:** lint and `tsc` are clean, and all 23 e2e tests pass.
 
-### Step 3: Document the asset scripts in the README ✅ Done
+### Step 3: Document the asset scripts in the README ✅ Done (commit `3de3fcc`)
 - **Requirement:** the README explains the asset scripts: what each one downloads, where the files go, and how to run them.
 - **Why:** Kevin asked. Both scripts are re-run only occasionally, so how to use them is easy to forget.
 - **How:** in the main README rather than a `scripts/README.md`.
@@ -119,6 +119,28 @@ All of it comes from GMS v83 (the classic era) on maplestory.io. This only adds 
   - "Project layout" now lists `scripts/`, `public/cursors/`, `public/scrolls/`, the `src/data/*.json` files and `cursor.css`.
   - Every path it mentions exists, and both commands ran exactly as written, leaving no changes.
   - Also fixed the scroll script's header comment, which said it takes "a minute or two". It takes a few seconds.
+
+### Step 4: Fix the code review's correctness findings ✅ Done
+- **Requirement:** fix the four correctness findings from the high-effort code review of PR #2 in `fetch-scroll-assets.mjs`.
+- **Why:** none of them affected the committed run, but each could produce wrong or half-written assets on a future re-run.
+- **How and result:**
+  1. **Failed scrolls exited 0.** A scroll that failed to download was dropped from `scrolls.json` while the script still reported success.
+     - Now any failure prints the failed IDs and "Nothing was written", with exit code 1.
+  2. **Folders were cleared before validation.** The icon and effect folders were deleted before the new data was checked, so a failure (e.g. the unnamed-icon guard) left them half-written.
+     - Now everything is downloaded, padded, encoded and checked first. All writes happen together at the end, via a small `replaceDir` helper, and only if nothing failed.
+  3. **`roundUpToEven` rounded negative odd numbers down** (-3 → -4), which would make `pad` throw for effects whose origins are all negative.
+     - It's now `n + Math.abs(n % 2)`.
+  4. **Delay errors were swallowed.** Any error fetching a frame's delay quietly became 100 ms.
+     - Now only a 404 (the frame has no delay) uses the game's 100 ms default. Other errors fail the run.
+- **Verified:**
+  - A normal run reproduces every committed file byte-for-byte (`git status` shows nothing under `public/` or `src/`).
+  - Three forced failures, each from a throwaway copy of the script:
+    - an extra scroll ID that 404s,
+    - an icon name removed,
+    - delay requests pointed at an unreachable host.
+  - Each exited with code 1 and changed no files.
+  - Rounding: -3…3 becomes -2, -2, 0, 0, 2, 2, 4. `eslint scripts/` is clean.
+- **Not fixed:** the review's other four findings (icon names keyed by scroll ID, no test for icon references, the 340 KB `scrolls.json`, and scrolls downloading after effects). These are left for later.
 
 ## Verification
 - **Counts:** 754 icons, or the script lists the missing IDs, and `scrolls.json` has the same number of entries. Spot-check a few against known scrolls, e.g. 2040001 = "Scroll for Helmet for DEF", 60%.
@@ -148,3 +170,5 @@ All of it comes from GMS v83 (the classic era) on maplestory.io. This only adds 
 - 2026-11-10: Kevin noticed duplicate icons (22 distinct out of 754). Step 2 and its script now save each distinct icon once, with an `icon` field per scroll.
 - 2026-11-10: Kevin asked for semantic icon names. The icons are now named by appearance (`blue`, `red`, `chaos`…) from a table in the script.
 - 2026-11-10: Step 3 added and done: the asset scripts are documented in the README.
+- 2026-11-10: Steps 2 and 3 committed (`503e1ff`, `3de3fcc`). Pushed `scroll-assets` and opened PR #2.
+- 2026-11-10: Code review of PR #2. Step 4 fixes its four correctness findings, verified with forced failures. The other four findings are left for later.

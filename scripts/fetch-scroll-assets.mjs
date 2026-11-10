@@ -14,7 +14,9 @@
 // - src/data/scroll-effects.json: frame delays, canvas size and anchor point
 // - public/scrolls/sounds/{success,failure}.mp3: the matching sounds
 //
-// About 870 requests, run 8 at a time; it takes a few seconds.
+// About 870 requests, run 8 at a time; it takes a few seconds. Everything is
+// downloaded and checked before any file is touched, so a failed run (exit
+// code 1) leaves the committed assets as they were.
 
 import { createHash } from "node:crypto";
 import { mkdir, rm, writeFile } from "node:fs/promises";
@@ -70,9 +72,6 @@ async function fetchScrolls() {
   const ids = children.map(Number).sort((a, b) => a - b);
   console.log(`Scrolls: ${ids.length} to fetch`);
 
-  await rm(out("public/scrolls/icons/"), { recursive: true, force: true });
-  await mkdir(out("public/scrolls/icons/"), { recursive: true });
-
   let done = 0;
   const failed = [];
   const scrolls = await mapLimit(ids, CONCURRENCY, async (id) => {
@@ -102,12 +101,14 @@ async function fetchScrolls() {
   });
 
   const saved = scrolls.filter(Boolean);
+  if (failed.length) return { listed: ids.length, failed };
 
   // Save each distinct icon once. Scrolls are sorted by ID, so the first scroll
   // with a given icon is the lowest ID, which looks up its name. The key
   // includes the origin, so icons only count as the same if they also align
   // the same.
   const icons = new Map(); // key → icon name
+  const iconFiles = new Map(); // icon name → PNG
   for (const scroll of saved) {
     const key = `${createHash("sha256").update(scroll.iconPng).digest("hex")}@${scroll.iconOrigin}`;
     if (!icons.has(key)) {
@@ -118,7 +119,7 @@ async function fetchScrolls() {
         );
       }
       icons.set(key, name);
-      await writeFile(out(`public/scrolls/icons/${name}.png`), scroll.iconPng);
+      iconFiles.set(name, scroll.iconPng);
     }
     scroll.icon = icons.get(key);
     delete scroll.iconPng;
@@ -127,13 +128,24 @@ async function fetchScrolls() {
   const unused = Object.values(ICON_NAMES).filter((n) => ![...icons.values()].includes(n));
   if (unused.length) console.log(`Unused icon names: ${unused.join(", ")}`);
 
-  await writeFile(out("src/data/scrolls.json"), `${JSON.stringify(saved, null, 2)}\n`);
-  return { listed: ids.length, saved: saved.length, icons: icons.size, failed };
+  const write = async () => {
+    await replaceDir(out("public/scrolls/icons/"), iconFiles, (name) => `${name}.png`);
+    await writeFile(out("src/data/scrolls.json"), `${JSON.stringify(saved, null, 2)}\n`);
+  };
+  return { listed: ids.length, saved: saved.length, icons: icons.size, failed, write };
+}
+
+// Empties `dir` and writes `files` (a Map) into it, naming each with `fileName`
+async function replaceDir(dir, files, fileName) {
+  await rm(dir, { recursive: true, force: true });
+  await mkdir(dir, { recursive: true });
+  await Promise.all([...files].map(([key, data]) => writeFile(new URL(fileName(key), dir), data)));
 }
 
 // --- Effects: success and failure animations ---
 
-const roundUpToEven = (n) => n + (n % 2);
+// Rounds up for negatives too (-3 → -2): `n % 2` is -1 for negative odd n
+const roundUpToEven = (n) => n + Math.abs(n % 2);
 
 async function fetchEffect(name, wzName) {
   const base = `${WZ}/Effect/BasicEff.img/Enchant/${wzName}`;
@@ -144,8 +156,12 @@ async function fetchEffect(name, wzName) {
     const [frame, origin, delay] = await Promise.all([
       getJson(`${base}/${f}`),
       getJson(`${base}/${f}/origin`),
-      // The game uses 100 ms when a frame has no delay
-      getJson(`${base}/${f}/delay`).catch(() => ({ value: 100 })),
+      // The game uses 100 ms when a frame has no delay. Other errors (e.g.
+      // timeouts after retries) still fail the run.
+      getJson(`${base}/${f}/delay`).catch((err) => {
+        if (err.final) return { value: 100 };
+        throw err;
+      }),
     ]);
     return {
       image: decodePng(Buffer.from(frame.value, "base64")),
@@ -166,17 +182,18 @@ async function fetchEffect(name, wzName) {
     ),
   );
 
-  const dir = out(`public/scrolls/effects/${name}/`);
-  await rm(dir, { recursive: true, force: true });
-  await mkdir(dir, { recursive: true });
-  await Promise.all(
+  // Pad and encode now, so a frame that doesn't fit fails before any writes
+  const pngs = new Map(
     frames.map((f, i) => {
       const offset = [anchor[0] - f.origin[0], anchor[1] - f.origin[1]];
-      const file = new URL(`${String(i).padStart(2, "0")}.png`, dir);
-      return writeFile(file, encodePng(pad(f.image, canvas, offset)));
+      return [i, encodePng(pad(f.image, canvas, offset))];
     }),
   );
-  return { frames: frames.length, delays: frames.map((f) => f.delay), canvas, anchor };
+  return {
+    manifest: { frames: frames.length, delays: frames.map((f) => f.delay), canvas, anchor },
+    write: () =>
+      replaceDir(out(`public/scrolls/effects/${name}/`), pngs, (i) => `${String(i).padStart(2, "0")}.png`),
+  };
 }
 
 // --- Sounds ---
@@ -210,9 +227,13 @@ async function fetchSound(name, wzName) {
   for (let i = 0; i < data.length; i++) {
     const length = mp3FrameLength(data, i);
     if (length && mp3FrameLength(data, i + length)) {
-      await mkdir(out("public/scrolls/sounds/"), { recursive: true });
-      await writeFile(out(`public/scrolls/sounds/${name}.mp3`), data.subarray(i));
-      return { header: i, bytes: data.length - i };
+      return {
+        info: { header: i, bytes: data.length - i },
+        write: async () => {
+          await mkdir(out("public/scrolls/sounds/"), { recursive: true });
+          await writeFile(out(`public/scrolls/sounds/${name}.mp3`), data.subarray(i));
+        },
+      };
     }
   }
   throw new Error(`No MP3 data found in ${wzName}`);
@@ -222,25 +243,32 @@ async function fetchSound(name, wzName) {
 
 const started = Date.now();
 const [effects, sounds] = await Promise.all([
-  Promise.all([fetchEffect("success", "Success"), fetchEffect("failure", "Failure")]).then(
-    ([success, failure]) => ({ success, failure }),
-  ),
+  Promise.all([fetchEffect("success", "Success"), fetchEffect("failure", "Failure")]),
   Promise.all([fetchSound("success", "EnchantSuccess"), fetchSound("failure", "EnchantFailure")]),
 ]);
-await writeFile(out("src/data/scroll-effects.json"), `${JSON.stringify(effects, null, 2)}\n`);
-console.log("Effects:");
-console.table(
-  Object.fromEntries(
-    Object.entries(effects).map(([k, e]) => [
-      k,
-      { frames: e.frames, canvas: e.canvas.join("×"), anchor: e.anchor.join(","), ms: e.delays.reduce((a, b) => a + b, 0) },
-    ]),
-  ),
-);
-console.log("Sounds:");
-console.table({ success: sounds[0], failure: sounds[1] });
-
 const scrolls = await fetchScrolls();
-console.log(`Scrolls: ${scrolls.saved} of ${scrolls.listed} saved, using ${scrolls.icons} distinct icons`);
-if (scrolls.failed.length) console.log(`Failed:\n  ${scrolls.failed.join("\n  ")}`);
+
+if (scrolls.failed.length) {
+  console.log(`Failed:\n  ${scrolls.failed.join("\n  ")}`);
+  console.log(`${scrolls.failed.length} of ${scrolls.listed} scrolls failed. Nothing was written.`);
+  process.exitCode = 1;
+} else {
+  const [success, failure] = effects;
+  await Promise.all([success.write(), failure.write(), sounds[0].write(), sounds[1].write(), scrolls.write()]);
+  const manifest = { success: success.manifest, failure: failure.manifest };
+  await writeFile(out("src/data/scroll-effects.json"), `${JSON.stringify(manifest, null, 2)}\n`);
+
+  console.log("Effects:");
+  console.table(
+    Object.fromEntries(
+      Object.entries(manifest).map(([k, e]) => [
+        k,
+        { frames: e.frames, canvas: e.canvas.join("×"), anchor: e.anchor.join(","), ms: e.delays.reduce((a, b) => a + b, 0) },
+      ]),
+    ),
+  );
+  console.log("Sounds:");
+  console.table({ success: sounds[0].info, failure: sounds[1].info });
+  console.log(`Scrolls: ${scrolls.saved} of ${scrolls.listed} saved, using ${scrolls.icons} distinct icons`);
+}
 console.log(`Done in ${((Date.now() - started) / 1000).toFixed(1)} s`);
