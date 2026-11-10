@@ -44,10 +44,32 @@ npx playwright test --ui          # step through tests in Playwright's UI
 
 Every test also fails if the page logs an error (see `e2e/fixtures.ts`). GitHub Actions runs lint and these tests on every pull request and push to `main`.
 
+## Game assets
+
+Game images, sounds and item data come from [maplestory.io](https://maplestory.io), which serves MapleStory's game files as JSON. The results are committed, so the scripts in `scripts/` only need running to refresh or change the assets. Both use only Node's built-in modules.
+
+```bash
+node scripts/fetch-cursors.mjs        # mouse cursor frames
+node scripts/fetch-scroll-assets.mjs  # scroll icons, data, effects and sounds
+```
+
+- **`fetch-cursors.mjs`** saves the in-game mouse cursor (GMS v270) to `public/cursors/`. It prints each frame's hotspot (the pixel that clicks). If those change, update `src/app/cursor.css` to match.
+- **`fetch-scroll-assets.mjs`** saves the assets for the scroll simulator (GMS v83). It takes a few seconds.
+  - Every equipment scroll's data goes to `src/data/scrolls.json`.
+  - Their icons go to `public/scrolls/icons/`. Many scrolls share an icon, so each distinct icon is saved once under a name from `ICON_NAMES` in the script. If it stops with "New icon…", add a name there.
+  - The success and failure animations go to `public/scrolls/effects/`, described in `src/data/scroll-effects.json`.
+  - Their sounds go to `public/scrolls/sounds/`.
+- **`scripts/lib/`** has the shared helpers: PNG read/write, and fetching with retries and a concurrency limit.
+
+Animation frames are padded onto a shared canvas, so they stay aligned while animating. Browsers cache images, so hard-reload (Cmd+Shift+R) after refreshing them.
+
 ## Project layout
 
-- `src/app/` — pages, root layout, global styles (`globals.css` defines the light/dark color roles)
-- `src/components/` — UI pieces (header, theme toggle, placeholder page)
+- `src/app/` — pages, root layout, global styles (`globals.css` defines the light/dark color roles, `cursor.css` the MapleStory cursor)
+- `src/components/` — UI pieces (header, theme toggle, cursor press state, placeholder page)
 - `src/data/tools.ts` — the tools listed on the home page
+- `src/data/*.json` — game data from the asset scripts (`scrolls.json`, `scroll-effects.json`)
+- `public/cursors/`, `public/scrolls/` — game images and sounds (see [Game assets](#game-assets))
+- `scripts/` — scripts that download the game assets
 - `e2e/` — Playwright end-to-end tests
 - `docs/plans/` — step-by-step plans and their change logs
