@@ -1,0 +1,556 @@
+[
+  {
+    "id": 1002357,
+    "name": "Zakum Helmet",
+    "category": "Armor",
+    "subCategory": "Hat",
+    "iconOrigin": [
+      1,
+      34
+    ],
+    "only": true,
+    "cash": false,
+    "reqLevel": 50,
+    "mob": 0,
+    "price": 500000,
+    "reqSTR": 0,
+    "reqDEX": 0,
+    "reqINT": 0,
+    "reqLUK": 0,
+    "reqJob": 0,
+    "reqLevelEquip": 50,
+    "tuc": 10,
+    "incSTR": 15,
+    "incDEX": 15,
+    "incINT": 15,
+    "incLUK": 15,
+    "incPDD": 150,
+    "incMDD": 150,
+    "incACC": 20,
+    "incEVA": 20,
+    "tradeBlock": true,
+    "tradeAvailable": 1,
+    "vslots": [
+      "Cp",
+      "H1",
+      "H2",
+      "H3",
+      "H4",
+      "H5",
+      "Hf",
+      "Hs",
+      "Hb",
+      "Ae"
+    ],
+    "islots": [
+      "Cp"
+    ],
+    "setCompleteCount": 0
+  },
+  {
+    "id": 1012000,
+    "name": "Battle Scar",
+    "category": "Accessory",
+    "subCategory": "Face Accessory",
+    "iconOrigin": [
+      -3,
+      30
+    ],
+    "only": false,
+    "cash": true,
+    "reqLevel": 0,
+    "mob": 0,
+    "reqSTR": 0,
+    "reqDEX": 0,
+    "reqINT": 0,
+    "reqLUK": 0,
+    "reqJob": 0,
+    "reqLevelEquip": 0,
+    "vslots": [
+      "Af"
+    ],
+    "islots": [
+      "Af"
+    ],
+    "setCompleteCount": 0
+  },
+  {
+    "id": 1022000,
+    "name": "Orange Shades",
+    "category": "Accessory",
+    "subCategory": "Eye Decoration",
+    "iconOrigin": [
+      -3,
+      25
+    ],
+    "only": false,
+    "cash": true,
+    "reqLevel": 0,
+    "mob": 0,
+    "reqSTR": 0,
+    "reqDEX": 0,
+    "reqINT": 0,
+    "reqLUK": 0,
+    "reqJob": 0,
+    "reqLevelEquip": 0,
+    "vslots": [
+      "Ay"
+    ],
+    "islots": [
+      "Ay"
+    ],
+    "setCompleteCount": 0
+  },
+  {
+    "id": 1032000,
+    "name": "Weighted Earrings",
+    "category": "Accessory",
+    "subCategory": "Earrings",
+    "iconOrigin": [
+      -3,
+      30
+    ],
+    "only": false,
+    "cash": false,
+    "reqLevel": 20,
+    "mob": 0,
+    "price": 5000,
+    "reqSTR": 0,
+    "reqDEX": 0,
+    "reqINT": 0,
+    "reqLUK": 0,
+    "reqJob": 0,
+    "reqLevelEquip": 20,
+    "tuc": 5,
+    "vslots": [
+      "Ae"
+    ],
+    "islots": [
+      "Ae"
+    ],
+    "setCompleteCount": 0
+  },
+  {
+    "id": 1040002,
+    "name": "White Undershirt",
+    "category": "Armor",
+    "subCategory": "Top",
+    "iconOrigin": [
+      -1,
+      28
+    ],
+    "only": false,
+    "cash": false,
+    "reqLevel": 0,
+    "mob": 0,
+    "price": 25,
+    "reqSTR": 0,
+    "reqDEX": 0,
+    "reqINT": 0,
+    "reqLUK": 0,
+    "reqJob": 0,
+    "reqLevelEquip": 0,
+    "tuc": 7,
+    "incPDD": 3,
+    "vslots": [
+      "Ma"
+    ],
+    "islots": [
+      "Ma"
+    ],
+    "setCompleteCount": 0
+  },
+  {
+    "id": 1060002,
+    "name": "Blue Jean Shorts",
+    "category": "Armor",
+    "subCategory": "Bottom",
+    "iconOrigin": [
+      -4,
+      23
+    ],
+    "only": false,
+    "cash": false,
+    "reqLevel": 0,
+    "mob": 0,
+    "price": 25,
+    "reqSTR": 0,
+    "reqDEX": 0,
+    "reqINT": 0,
+    "reqLUK": 0,
+    "reqJob": 0,
+    "reqLevelEquip": 0,
+    "tuc": 7,
+    "incPDD": 2,
+    "vslots": [
+      "Pn"
+    ],
+    "islots": [
+      "Pn"
+    ],
+    "setCompleteCount": 0
+  },
+  {
+    "id": 1072001,
+    "name": "Red Rubber Boots",
+    "category": "Armor",
+    "subCategory": "Shoes",
+    "iconOrigin": [
+      -2,
+      30
+    ],
+    "only": false,
+    "cash": false,
+    "reqLevel": 0,
+    "mob": 0,
+    "price": 1,
+    "reqSTR": 0,
+    "reqDEX": 0,
+    "reqINT": 0,
+    "reqLUK": 0,
+    "reqJob": 0,
+    "reqLevelEquip": 0,
+    "tuc": 5,
+    "incPDD": 2,
+    "vslots": [
+      "So"
+    ],
+    "islots": [
+      "So"
+    ],
+    "setCompleteCount": 0
+  },
+  {
+    "id": 1082002,
+    "name": "Work Gloves",
+    "category": "Armor",
+    "subCategory": "Glove",
+    "iconOrigin": [
+      -2,
+      28
+    ],
+    "only": false,
+    "cash": false,
+    "reqLevel": 10,
+    "mob": 0,
+    "price": 2000,
+    "reqSTR": 0,
+    "reqDEX": 0,
+    "reqINT": 0,
+    "reqLUK": 0,
+    "reqJob": 0,
+    "reqLevelEquip": 10,
+    "tuc": 5,
+    "incPDD": 2,
+    "vslots": [
+      "Gl",
+      "Gw"
+    ],
+    "islots": [
+      "Gv"
+    ],
+    "setCompleteCount": 0
+  },
+  {
+    "id": 1092030,
+    "name": "Maple Shield",
+    "category": "Armor",
+    "subCategory": "Shield",
+    "iconOrigin": [
+      -1,
+      29
+    ],
+    "only": false,
+    "cash": false,
+    "reqLevel": 20,
+    "mob": 0,
+    "price": 15000,
+    "reqSTR": 0,
+    "reqDEX": 0,
+    "reqINT": 0,
+    "reqLUK": 0,
+    "reqJob": 0,
+    "reqLevelEquip": 20,
+    "tuc": 10,
+    "incPDD": 10,
+    "incMDD": 10,
+    "incEVA": 1,
+    "vslots": [
+      "Si"
+    ],
+    "islots": [
+      "Si"
+    ],
+    "setCompleteCount": 0
+  },
+  {
+    "id": 1102000,
+    "name": "Green Napoleon",
+    "category": "Armor",
+    "subCategory": "Cape",
+    "iconOrigin": [
+      -2,
+      32
+    ],
+    "only": false,
+    "cash": false,
+    "reqLevel": 50,
+    "mob": 0,
+    "price": 50000,
+    "reqSTR": 0,
+    "reqDEX": 0,
+    "reqINT": 0,
+    "reqLUK": 0,
+    "reqJob": 0,
+    "reqLevelEquip": 50,
+    "tuc": 5,
+    "incPDD": 10,
+    "incMDD": 15,
+    "vslots": [
+      "Sr"
+    ],
+    "islots": [
+      "Sr"
+    ],
+    "setCompleteCount": 0
+  },
+  {
+    "id": 1122000,
+    "name": "Horntail Necklace",
+    "category": "Accessory",
+    "subCategory": "Pendant",
+    "iconOrigin": [
+      -2,
+      32
+    ],
+    "only": true,
+    "cash": false,
+    "reqLevel": 120,
+    "mob": 0,
+    "price": 300000,
+    "reqSTR": 0,
+    "reqDEX": 0,
+    "reqINT": 0,
+    "reqLUK": 0,
+    "reqJob": 0,
+    "reqLevelEquip": 120,
+    "tuc": 3,
+    "incSTR": 7,
+    "incDEX": 7,
+    "incINT": 7,
+    "incLUK": 7,
+    "incPDD": 108,
+    "incMDD": 108,
+    "incEVA": 24,
+    "tradeBlock": true,
+    "tradeAvailable": 1,
+    "vslots": [
+      "Pe"
+    ],
+    "islots": [
+      "Pe"
+    ],
+    "setCompleteCount": 0
+  },
+  {
+    "id": 1302000,
+    "name": "Sword",
+    "category": "One-Handed Weapon",
+    "subCategory": "One-Handed Sword",
+    "iconOrigin": [
+      0,
+      30
+    ],
+    "only": false,
+    "cash": false,
+    "reqLevel": 0,
+    "mob": 0,
+    "price": 1,
+    "reqSTR": 0,
+    "reqDEX": 0,
+    "reqINT": 0,
+    "reqLUK": 0,
+    "reqJob": 0,
+    "reqLevelEquip": 0,
+    "tuc": 7,
+    "incPAD": 17,
+    "attack": 1,
+    "attackSpeed": 4,
+    "vslots": [
+      "Wp"
+    ],
+    "islots": [
+      "Wp"
+    ],
+    "setCompleteCount": 0
+  },
+  {
+    "id": 1302020,
+    "name": "Maple Sword",
+    "category": "One-Handed Weapon",
+    "subCategory": "One-Handed Sword",
+    "iconOrigin": [
+      -1,
+      31
+    ],
+    "only": false,
+    "cash": false,
+    "reqLevel": 35,
+    "mob": 0,
+    "price": 40000,
+    "reqSTR": 0,
+    "reqDEX": 0,
+    "reqINT": 0,
+    "reqLUK": 0,
+    "reqJob": 0,
+    "reqLevelEquip": 35,
+    "tuc": 7,
+    "incPAD": 48,
+    "incACC": 20,
+    "attack": 1,
+    "attackSpeed": 5,
+    "vslots": [
+      "Wp"
+    ],
+    "islots": [
+      "Wp"
+    ],
+    "setCompleteCount": 0
+  },
+  {
+    "id": 1332025,
+    "name": "Maple Wagner",
+    "category": "One-Handed Weapon",
+    "subCategory": "Dagger",
+    "iconOrigin": [
+      0,
+      32
+    ],
+    "only": false,
+    "cash": false,
+    "reqLevel": 43,
+    "mob": 0,
+    "price": 70000,
+    "reqSTR": 0,
+    "reqDEX": 0,
+    "reqINT": 0,
+    "reqLUK": 0,
+    "reqJob": 8,
+    "reqLevelEquip": 43,
+    "tuc": 7,
+    "incPAD": 58,
+    "incACC": 10,
+    "incEVA": 15,
+    "attack": 1,
+    "attackSpeed": 4,
+    "vslots": [
+      "Wp"
+    ],
+    "islots": [
+      "Wp"
+    ],
+    "setCompleteCount": 0
+  },
+  {
+    "id": 1382009,
+    "name": "Maple Staff",
+    "category": "One-Handed Weapon",
+    "subCategory": "Staff",
+    "iconOrigin": [
+      2,
+      35
+    ],
+    "only": false,
+    "cash": false,
+    "reqLevel": 35,
+    "mob": 0,
+    "price": 35000,
+    "reqSTR": 0,
+    "reqDEX": 0,
+    "reqINT": 0,
+    "reqLUK": 0,
+    "reqJob": 2,
+    "reqLevelEquip": 35,
+    "tuc": 7,
+    "incMHP": 100,
+    "incPAD": 35,
+    "incMAD": 48,
+    "attack": 6,
+    "attackSpeed": 6,
+    "vslots": [
+      "Wp"
+    ],
+    "islots": [
+      "Wp"
+    ],
+    "setCompleteCount": 0
+  },
+  {
+    "id": 1452022,
+    "name": "Maple Soul Searcher",
+    "category": "Two-Handed Weapon",
+    "subCategory": "Bow",
+    "iconOrigin": [
+      1,
+      34
+    ],
+    "only": false,
+    "cash": false,
+    "reqLevel": 43,
+    "mob": 0,
+    "price": 50000,
+    "reqSTR": 0,
+    "reqDEX": 0,
+    "reqINT": 0,
+    "reqLUK": 0,
+    "reqJob": 4,
+    "reqLevelEquip": 43,
+    "tuc": 7,
+    "incPAD": 58,
+    "incSpeed": 7,
+    "attack": 3,
+    "attackSpeed": 5,
+    "vslots": [
+      "Wp",
+      "Si"
+    ],
+    "islots": [
+      "Wp",
+      "Si"
+    ],
+    "setCompleteCount": 0
+  },
+  {
+    "id": 1472030,
+    "name": "Maple Claw",
+    "category": "Two-Handed Weapon",
+    "subCategory": "Claw",
+    "iconOrigin": [
+      -1,
+      31
+    ],
+    "only": false,
+    "cash": false,
+    "reqLevel": 35,
+    "mob": 0,
+    "price": 40000,
+    "reqSTR": 0,
+    "reqDEX": 0,
+    "reqINT": 0,
+    "reqLUK": 0,
+    "reqJob": 8,
+    "reqLevelEquip": 35,
+    "tuc": 7,
+    "incPAD": 20,
+    "incEVA": 10,
+    "attack": 7,
+    "attackSpeed": 3,
+    "vslots": [
+      "Wp"
+    ],
+    "islots": [
+      "Wp"
+    ],
+    "setCompleteCount": 0
+  }
+]
