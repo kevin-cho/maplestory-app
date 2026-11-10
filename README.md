@@ -51,6 +51,7 @@ Game images, sounds and item data come from [maplestory.io](https://maplestory.i
 ```bash
 node scripts/fetch-cursors.mjs        # mouse cursor frames
 node scripts/fetch-scroll-assets.mjs  # scroll icons, data, effects and sounds
+node scripts/fetch-inventory-ui.mjs   # inventory windows, tabs and sample items
 ```
 
 - **`fetch-cursors.mjs`** saves the in-game mouse cursor (GMS v270) to `public/cursors/`. It prints each frame's hotspot (the pixel that clicks). If those change, update `src/app/cursor.css` to match.
@@ -62,6 +63,11 @@ node scripts/fetch-scroll-assets.mjs  # scroll icons, data, effects and sounds
   - Their icons go to `public/scrolls/icons/`. Many scrolls share an icon, so each distinct icon is saved once under a name from `ICON_NAMES` in the script. If it stops with "New icon…", add a name there.
   - The success and failure animations go to `public/scrolls/effects/`, described in `src/data/scroll-effects.json`.
   - Their sounds go to `public/scrolls/sounds/`.
+- **`fetch-inventory-ui.mjs`** saves the Equipment and Item inventory windows (GMS v83) to `public/inventory/`.
+  - The window art (`equip-window.png`, `item-window.png`) has the slots drawn in, but no slot positions in the data, so those are measured by hand in the app's layout code.
+  - `tabs/` has the Item window's tab labels (white text) and the `frame-*` pieces the tab row is built from. The art's tab strip is blank, and the game draws the tabs in code.
+  - `scrollbar/` has the Item window's greyed-out scrollbar pieces, also drawn in code. The app never has enough items to scroll, so the scrollbar always shows greyed out.
+  - A few sample equips go to `public/inventory/items/{id}.png`, with their data in `src/data/sample-items.json`. To change them, edit `SAMPLE_ITEMS` in the script.
 - **`scripts/lib/`** has the shared helpers: PNG read/write, and fetching with retries and a concurrency limit.
 
 Animation frames are padded onto a shared canvas, so they stay aligned while animating. Browsers cache images, so hard-reload (Cmd+Shift+R) after refreshing them.
@@ -71,8 +77,8 @@ Animation frames are padded onto a shared canvas, so they stay aligned while ani
 - `src/app/` — pages, root layout, global styles (`globals.css` defines the light/dark color roles, `cursor.css` the MapleStory cursor)
 - `src/components/` — UI pieces (header, theme toggle, cursor press state, placeholder page)
 - `src/data/tools.ts` — the tools listed on the home page
-- `src/data/*.json` — game data from the asset scripts (`scrolls.json`, `scroll-effects.json`)
-- `public/cursors/`, `public/scrolls/` — game images and sounds (see [Game assets](#game-assets))
+- `src/data/*.json` — game data from the asset scripts (`scrolls.json`, `scroll-effects.json`, `sample-items.json`)
+- `public/cursors/`, `public/scrolls/`, `public/inventory/` — game images and sounds (see [Game assets](#game-assets))
 - `scripts/` — scripts that download the game assets
 - `e2e/` — Playwright end-to-end tests
 - `docs/plans/` — step-by-step plans and their change logs
