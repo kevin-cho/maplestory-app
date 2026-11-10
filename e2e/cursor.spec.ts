@@ -14,22 +14,33 @@ test.beforeEach(async ({ page }) => {
 });
 
 test("serves every cursor image under the basePath", async ({ request }) => {
-  for (const name of ["default", "hover-1", "hover-2", "pressed"]) {
+  for (const name of [
+    "default",
+    "hover-1",
+    "hover-2",
+    "pressed",
+    "grab-open",
+    "grab-half",
+    "grab-close",
+  ]) {
     const res = await request.get(`/maplestory/cursors/${name}.png`);
     expect(res.status(), name).toBe(200);
     expect(res.headers()["content-type"], name).toBe("image/png");
   }
 });
 
-test("both hover frames share one canvas, so the mouse icon doesn't shift", async ({
-  request,
-}) => {
+test("animation frames share one canvas, so they don't shift", async ({ request }) => {
   // Width and height sit at bytes 16–23 of a PNG (in its IHDR chunk)
   const sizeOf = async (name: string) => {
     const png = await (await request.get(`/maplestory/cursors/${name}.png`)).body();
     return [png.readUInt32BE(16), png.readUInt32BE(20)];
   };
+  // The mouse icon stays still while the finger wags
   expect(await sizeOf("hover-1")).toEqual(await sizeOf("hover-2"));
+  // The hand closes in place, and the holding cursor is the closed frame
+  const grab = await sizeOf("grab-open");
+  expect(await sizeOf("grab-half")).toEqual(grab);
+  expect(await sizeOf("grab-close")).toEqual(grab);
 });
 
 test("the page uses the pointing finger", async ({ page }) => {
@@ -108,4 +119,68 @@ test("with reduced motion, hovering shows one still frame", async ({ page }) => 
   expect(await cursorOf(page.locator("body > input[type=checkbox]"))).toContain(
     "/maplestory/cursors/hover-1.png",
   );
+});
+
+// Draggable items (Plan 04). The app has no inventory yet, so these add
+// stand-in elements with the classes the inventory will use.
+test.describe("grab and holding", () => {
+  test.beforeEach(async ({ page }) => {
+    await page.evaluate(() => {
+      // Text gives them a size, so the mouse can hover them
+      const item = Object.assign(document.createElement("div"), { id: "item", textContent: "Item" });
+      const button = Object.assign(document.createElement("button"), {
+        id: "item-button",
+        textContent: "Item button",
+      });
+      item.className = button.className = "cursor-grab";
+      document.body.append(item, button);
+    });
+  });
+
+  test("draggable items animate the grab cursor, even on buttons", async ({ page }) => {
+    for (const id of ["#item", "#item-button"]) {
+      const el = page.locator(id);
+      expect(await animationOf(el), id).toBe("maple-cursor-grab");
+      expect(await cursorOf(el), id).toMatch(/\/maplestory\/cursors\/grab-(open|half|close)\.png/);
+    }
+  });
+
+  test("holding an item shows the closed hand everywhere", async ({ page }) => {
+    await page.evaluate(() => document.documentElement.classList.add("cursor-grabbing"));
+    const link = page.getByRole("link", { name: "MapleStory Classic Tools" });
+    for (const el of [page.locator("body"), page.locator("#item"), link]) {
+      expect(await cursorOf(el)).toContain("/maplestory/cursors/grab-close.png");
+    }
+  });
+
+  test("pressing on an item shows the closed hand, not the pressing finger", async ({
+    page,
+  }) => {
+    // No flash of the finger between hovering and picking the item up
+    await page.locator("#item").hover();
+    await page.mouse.down();
+    await expect(page.locator("html")).toHaveAttribute("data-mouse-down", "");
+    expect(await cursorOf(page.locator("#item"))).toContain("/maplestory/cursors/grab-close.png");
+    // Pressing elsewhere still shows the pressing finger
+    expect(await cursorOf(page.locator("body"))).toContain("/maplestory/cursors/pressed.png");
+    await page.mouse.up();
+  });
+
+  test("holding beats pressing", async ({ page }) => {
+    await page.evaluate(() => document.documentElement.classList.add("cursor-grabbing"));
+    await page.mouse.move(5, 300);
+    await page.mouse.down();
+    await expect(page.locator("html")).toHaveAttribute("data-mouse-down", "");
+    expect(await cursorOf(page.locator("body"))).toContain("/maplestory/cursors/grab-close.png");
+    await page.mouse.up();
+  });
+
+  test("with reduced motion, grab shows the open hand", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    for (const id of ["#item", "#item-button"]) {
+      const el = page.locator(id);
+      expect(await animationOf(el), id).toBe("none");
+      expect(await cursorOf(el), id).toContain("/maplestory/cursors/grab-open.png");
+    }
+  });
 });
