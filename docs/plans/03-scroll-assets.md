@@ -1,6 +1,6 @@
 # Scroll assets: icons, data, effect frames and sounds
 
-**Status:** 🔍 In review: [PR #2](https://github.com/kevin-cho/maplestory-app/pull/2) from branch `scroll-assets`. Step 4 (review fixes) is done but not committed yet.
+**Status:** ✅ Done (2026-11-10): [PR #2](https://github.com/kevin-cho/maplestory-app/pull/2) merged into `main` (merge commit `ba66a52`). The scroll assets are ready for the scroll simulator.
 
 ## Context
 Kevin wants assets ready for the future scroll simulator:
@@ -120,7 +120,7 @@ All of it comes from GMS v83 (the classic era) on maplestory.io. This only adds 
   - Every path it mentions exists, and both commands ran exactly as written, leaving no changes.
   - Also fixed the scroll script's header comment, which said it takes "a minute or two". It takes a few seconds.
 
-### Step 4: Fix the code review's correctness findings ✅ Done
+### Step 4: Fix the code review's correctness findings ✅ Done (commit `db30af5`)
 - **Requirement:** fix the four correctness findings from the high-effort code review of PR #2 in `fetch-scroll-assets.mjs`.
 - **Why:** none of them affected the committed run, but each could produce wrong or half-written assets on a future re-run.
 - **How and result:**
@@ -172,3 +172,4 @@ All of it comes from GMS v83 (the classic era) on maplestory.io. This only adds 
 - 2026-11-10: Step 3 added and done: the asset scripts are documented in the README.
 - 2026-11-10: Steps 2 and 3 committed (`503e1ff`, `3de3fcc`). Pushed `scroll-assets` and opened PR #2.
 - 2026-11-10: Code review of PR #2. Step 4 fixes its four correctness findings, verified with forced failures. The other four findings are left for later.
+- 2026-11-10: Step 4 committed (`db30af5`). The tests passed, and PR #2 was merged with a merge commit (`ba66a52`), keeping the step hashes above valid.
