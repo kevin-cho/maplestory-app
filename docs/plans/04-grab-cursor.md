@@ -1,6 +1,6 @@
 # Grab and holding cursors
 
-**Status:** 🔍 In review: [PR #3](https://github.com/kevin-cho/maplestory-app/pull/3) from branch `grab-cursor`. All steps are done. Next: CI, Kevin's review, and the merge.
+**Status:** ✅ Done (2026-11-10): [PR #3](https://github.com/kevin-cho/maplestory-app/pull/3) merged into `main` (merge commit `fd38cbf`). The grab and holding cursors are ready for the inventory UI.
 
 ## Context
 In MapleStory, hovering an inventory item animates the cursor into a grabbing hand. After you click the item it's attached to the cursor, and the cursor stays a static fist while you move it. Kevin wants both cursors ready for the app's future inventory UI, such as the scroll simulator.
@@ -96,7 +96,7 @@ I surveyed states 2–16 on a contact sheet. The others are dice, house, gift, r
     ```
   - Kevin tried it and approved it after the press fix.
 
-### Step 3: Push and open a PR ✅ Done
+### Step 3: Push and open a PR ✅ Done (commit `7c4d0db`)
 - **Result:**
   - Pushed `grab-cursor` and opened [PR #3](https://github.com/kevin-cho/maplestory-app/pull/3), with a manual-check list.
   - When this doc was updated, CI had 1 check running.
@@ -117,3 +117,4 @@ I surveyed states 2–16 on a contact sheet. The others are dice, house, gift, r
 - 2026-11-10: Step 1 committed (`f2d2400`). Step 2 done: CSS, 4 new e2e tests (27 pass) and a README note. The animation timing was checked in the preview.
 - 2026-11-10: Kevin saw the pressing finger flash when clicking an item. Pressing on a grab item now shows the closed hand.
 - 2026-11-10: Step 2 committed (`4192148`). Step 3: pushed `grab-cursor` and opened PR #3. Added the DevTools snippet to Step 2.
+- 2026-11-10: Plan doc update committed (`7c4d0db`). The checks passed, and PR #3 was merged with a merge commit (`fd38cbf`), keeping the step hashes above valid.
