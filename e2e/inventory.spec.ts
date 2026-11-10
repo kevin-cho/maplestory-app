@@ -13,8 +13,8 @@ const equipWindow = (page: import("@playwright/test").Page) =>
 const itemWindow = (page: import("@playwright/test").Page) =>
   page.getByRole("region", { name: "Item Inventory" });
 
-test("every image loads", async ({ page }) => {
-  // Wait for the network to settle, then check no image is broken
+test("every image loads, including CSS backgrounds", async ({ page, request }) => {
+  // Wait for the network to settle, then check no <img> is broken
   await page.waitForLoadState("networkidle");
   const broken = await page.locator("img").evaluateAll((imgs) =>
     (imgs as HTMLImageElement[])
@@ -22,6 +22,26 @@ test("every image loads", async ({ page }) => {
       .map((img) => img.src),
   );
   expect(broken).toEqual([]);
+
+  // The tab fills and the scrollbar track are CSS backgrounds, which a broken
+  // <img> check can't see (and a 404 there logs no console error). Check both
+  // tab states: the open tab uses fill1, the others fill0.
+  const backgrounds = new Set<string>();
+  for (const tab of ["Equip", "Use"]) {
+    await itemWindow(page).getByRole("tab", { name: tab }).click();
+    const urls = await page.locator("section *").evaluateAll((els) =>
+      els.flatMap((el) => {
+        const match = getComputedStyle(el).backgroundImage.match(/url\("?(.+?)"?\)/);
+        return match ? [match[1]] : [];
+      }),
+    );
+    urls.forEach((url) => backgrounds.add(url));
+  }
+  expect([...backgrounds].some((url) => url.includes("frame-fill1"))).toBe(true);
+  expect([...backgrounds].some((url) => url.includes("scrollbar/disabled-base"))).toBe(true);
+  for (const url of backgrounds) {
+    expect((await request.get(url)).status(), url).toBe(200);
+  }
 });
 
 test("the equip window has every slot, with the worn items in theirs", async ({ page }) => {

@@ -1,6 +1,6 @@
 # Equipment and Item inventory windows
 
-**Status:** ✅ All steps built and committed on `inventory-windows` (2026-11-10). Not pushed yet.
+**Status:** ✅ All steps built. [PR #4](https://github.com/kevin-cho/maplestory-app/pull/4) is open. Fixes from its code review aren't committed yet.
 
 ## Context
 Kevin wants the game's Equipment Inventory and Item Inventory windows in the app, ready for interactions later (hover, click, drag, scrolling an item). The question was whether to download the game's UI art, build components, or both.
@@ -27,7 +27,7 @@ Kevin wants the game's Equipment Inventory and Item Inventory windows in the app
 | Scrollbar | Always drawn greyed out (the game's `disabled` pieces: up arrow, track, down arrow). No scrolling. | Kevin's requirement: the game always shows the scrollbar area, even with nothing to scroll. Later he decided scrolling isn't needed: the app won't have more than 24 items per tab. The window art has no track (the right-hand strip is blank), so like the tabs it's drawn from `UI/Basic.img/VScr4`, which Kevin picked from a mock. |
 | Images | A small `Sprite` component with a plain `<img>`, not `next/image` | The art must show exactly as is, and Next's image optimizer would resample it. Icons also come in many sizes, and `next/image` needs each one's width and height. One `eslint-disable` line in `sprite.tsx` covers it. |
 | Scaling | CSS `zoom` on the window (`sm:[zoom:2]`) | Children keep their coordinates in the art's pixels, at any scale. `transform: scale` would leave the layout box at 1×. |
-| Equip slot for an item | From the item's `islots` code (`Cp` = cap, `Wp` = weapon…), stored on each slot in the layout table | The game's own data says where an item goes, so there's no separate mapping to keep in sync. |
+| Equip slot for an item | `wearItems` places worn items from their `islots`: the first code is the slot the item shows in (rings fill the four ring slots in order), and any other codes are slots it also blocks (a bow blocks the shield, an overall blocks pants). It throws on an item with no slot or a clash. | The game's own data says where an item goes, so there's no separate mapping to keep in sync. Throwing makes a bad outfit fail the build instead of an item quietly disappearing (code review finding). |
 | Theme | Window art stays as-is in both themes; surrounding page uses existing semantic tokens | The art is the game's own; recolouring it would look wrong. |
 
 ## Steps (each needs approval before it is built)
@@ -166,6 +166,22 @@ Kevin wants the game's Equipment Inventory and Item Inventory windows in the app
   - Lint and `tsc` are clean, and the e2e run had 35 passed and 1 skipped.
   - On the page with Use open, all five labels are the same image, and Use's sits 2 px higher.
 
+### Code review fixes (PR #4) ✅ Done
+A high-effort review of PR #4 found 10 issues. Kevin asked for the top 4 to be fixed:
+1. **Rings, medals, belts and mounts had no slot.** Adding one to the outfit would have failed the build, and four rings couldn't share one code.
+   - The layout now has the game's codes `Ri` (all four ring slots), `Me`, `Be`, `Tm` and `Sd`, checked against real items (Ring of Alchemist, Diligent Explorer Medal, White Belt, Hog, Saddle).
+   - Pet equipment has no `islots` in the game data, so it still has no slot, and it throws with a clear message.
+2. **Two worn items for one slot silently overwrote each other.** `equipSlotFor` is replaced by `wearItems`, which places a whole outfit:
+   - Rings take the next free ring slot.
+   - An item's extra codes block those slots too.
+   - A clash throws and names both items.
+3. **The image test missed CSS backgrounds** (the tab fills and the scrollbar track). The test now also collects every background-image URL in both windows, with two different tabs open so both fill images appear, and checks each one returns 200.
+   - Checked by removing `frame-fill1.png`: the test failed with a 404 naming the file.
+4. **Items past 24 in a tab were dropped silently.** `checkTabsFit` now throws when a tab has more than 24 items, and the Item window calls it.
+- **Tests:** a new `e2e/inventory-layout.spec.ts` tests `wearItems` and `checkTabsFit` directly, with no page: rings filling in order, a fifth ring, medal/belt/mount slots, two weapons, a bow with a shield (in both orders), an overall with pants, pet equipment, and 24 vs 25 items.
+- **Checks:** lint and `tsc` are clean, and the e2e run had 42 passed and 1 skipped. The page on the dev server still shows the same 12 worn items, and all 33 of its images return 200.
+- **Not fixed (left for later):** no Home/End keys on the tabs, hand-entered tab widths, hard-coded asset paths in `items.ts`, unused layout fields, the `BUILT` set in `tools.spec.ts`, and the fetch script deleting `public/inventory/` before writing the subfolders.
+
 ## Later (separate plans)
 - Hover tooltips with item stats, click-to-select, drag between slots, sort/gather buttons, and wiring scrolls onto equips for the simulator itself.
 - Not planned: scrolling the Item window. Kevin doesn't expect more than 24 items per tab.
@@ -186,3 +202,4 @@ Kevin wants the game's Equipment Inventory and Item Inventory windows in the app
 - 2026-11-10: Kevin found the open tab's text squished. The label images were swapped (the game's `disabled` = the open tab) and the tabs widened by 2 px. He also decided scrolling isn't needed, so only the greyed-out scrollbar pieces are kept.
 - 2026-11-10: Kevin said labels shouldn't change when their tab opens, only move up slightly. Every tab now uses one label set, and the open tab's label is raised 1 px (his pick from a 1 px / 2 px mock). The bolder labels are no longer fetched.
 - 2026-11-10: Committed on `inventory-windows`, one commit per step and then this doc. Both tab fixes are part of Steps 2–4. Step 1's branch and this doc are in the doc's own commit; its hash goes in the next update.
+- 2026-11-10: The plan doc was committed as `3182955`, and PR #4 was opened. Code review: the top 4 findings are fixed (equip slots for rings/medals/belts/mounts, clash errors, CSS background checks, more than 24 items throws), with new direct tests. Not committed yet.

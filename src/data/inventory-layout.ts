@@ -27,7 +27,11 @@ export type EquipSlot = {
   label: string;
   x: number;
   y: number;
-  /** The game's code for this slot: an item fits it if its `islots` has it */
+  /**
+   * The game's code for this slot (e.g. "Wp"), matched against an item's
+   * `islots`. The four ring slots share "Ri". Slots without one (pet slots,
+   * Mob Equip) take items the sample data can't place yet.
+   */
   islot?: string;
 };
 
@@ -42,10 +46,10 @@ const equipSlot = (id: EquipSlotId, label: string, col: number, row: number, isl
 /** Every equip slot, in reading order (left to right, top to bottom) */
 export const equipSlots: EquipSlot[] = [
   equipSlot("cap", "Cap", 1, 0, "Cp"),
-  equipSlot("medal", "Medal", 0, 1),
+  equipSlot("medal", "Medal", 0, 1, "Me"),
   equipSlot("forehead", "Forehead", 1, 1, "Af"),
-  equipSlot("ring-1", "Ring", 3, 1),
-  equipSlot("ring-2", "Ring", 4, 1),
+  equipSlot("ring-1", "Ring", 3, 1, "Ri"),
+  equipSlot("ring-2", "Ring", 4, 1, "Ri"),
   equipSlot("eye-acc", "Eye Acc", 2, 2, "Ay"),
   equipSlot("ear-acc", "Ear Acc", 3, 2, "Ae"),
   equipSlot("mantle", "Mantle", 0, 3, "Sr"),
@@ -55,21 +59,61 @@ export const equipSlots: EquipSlot[] = [
   equipSlot("shield", "Shield", 4, 3, "Si"),
   equipSlot("gloves", "Gloves", 0, 4, "Gv"),
   equipSlot("pants", "Pants", 1, 4, "Pn"),
-  equipSlot("belt", "Belt", 2, 4),
-  equipSlot("ring-3", "Ring", 3, 4),
-  equipSlot("ring-4", "Ring", 4, 4),
+  equipSlot("belt", "Belt", 2, 4, "Be"),
+  equipSlot("ring-3", "Ring", 3, 4, "Ri"),
+  equipSlot("ring-4", "Ring", 4, 4, "Ri"),
   equipSlot("shoes", "Shoes", 2, 5, "So"),
   equipSlot("pet-mp", "Pet MP", 4, 5),
-  equipSlot("taming-mob", "Taming Mob", 0, 6),
-  equipSlot("saddle", "Saddle", 1, 6),
+  equipSlot("taming-mob", "Taming Mob", 0, 6, "Tm"),
+  equipSlot("saddle", "Saddle", 1, 6, "Sd"),
   equipSlot("mob-equip", "Mob Equip", 2, 6),
   equipSlot("pet-acc", "Pet Acc", 3, 6),
   equipSlot("pet-hp", "Pet HP", 4, 6),
 ];
 
-/** The slot an item is worn in, from its `islots` (e.g. ["Wp"] → weapon) */
-export function equipSlotFor(islots: readonly string[]): EquipSlotId | undefined {
-  return equipSlots.find((slot) => slot.islot && slot.islot === islots[0])?.id;
+type Wearable = { name: string; islots: readonly string[] };
+
+/**
+ * Puts each worn item in its equip slot, using the game's `islots`: the first
+ * code is the slot the item is shown in (rings take the next free ring slot),
+ * and any others are slots it also takes up. A bow (["Wp", "Si"]) leaves no
+ * room for a shield, and an overall (["Ma", "Pn"]) none for pants.
+ *
+ * Throws if an item has no slot, or its slots are already taken, so a bad
+ * outfit fails the build instead of an item quietly disappearing.
+ */
+export function wearItems<T extends Wearable>(items: readonly T[]): Partial<Record<EquipSlotId, T>> {
+  const worn: Partial<Record<EquipSlotId, T>> = {};
+  const takenBy = new Map<EquipSlotId, T>();
+
+  for (const item of items) {
+    const [shownIn, ...alsoTakes] = item.islots;
+    const candidates = equipSlots.filter((slot) => slot.islot && slot.islot === shownIn);
+    if (!candidates.length) {
+      throw new Error(`No equip slot for ${item.name} (islots: ${JSON.stringify(item.islots)})`);
+    }
+    const slot = candidates.find((s) => !takenBy.has(s.id));
+    if (!slot) {
+      const other = takenBy.get(candidates[0].id)!;
+      throw new Error(`Can't wear ${item.name}: ${candidates[0].label} is taken by ${other.name}`);
+    }
+
+    const blocked = alsoTakes.map((code) => {
+      const other = equipSlots.find((s) => s.islot === code);
+      if (!other) throw new Error(`Unknown slot code "${code}" on ${item.name}`);
+      return other;
+    });
+    for (const other of blocked) {
+      if (takenBy.has(other.id)) {
+        throw new Error(`Can't wear ${item.name}: it needs the ${other.label} slot, taken by ${takenBy.get(other.id)!.name}`);
+      }
+    }
+
+    worn[slot.id] = item;
+    takenBy.set(slot.id, item);
+    for (const other of blocked) takenBy.set(other.id, item);
+  }
+  return worn;
 }
 
 // --- Item Inventory ---
@@ -81,6 +125,18 @@ export const itemGrid = { x: 8, y: 50, cols: 4, rows: 6, pitchX: 36, pitchY: 34 
 export const ITEM_GRID_SLOTS = itemGrid.cols * itemGrid.rows;
 
 export type ItemTabId = "equip" | "use" | "setup" | "etc" | "cash";
+
+/**
+ * Throws if a tab has more items than its 24 slots. There's no scrolling (the
+ * app never needs it), so extra items would otherwise quietly go missing.
+ */
+export function checkTabsFit(items: Partial<Record<ItemTabId, readonly unknown[]>>): void {
+  for (const [tab, list] of Object.entries(items)) {
+    if (list.length > ITEM_GRID_SLOTS) {
+      throw new Error(`The ${tab} tab has ${list.length} items, but only ${ITEM_GRID_SLOTS} fit (there's no scrolling)`);
+    }
+  }
+}
 
 /**
  * The tabs, in the game's order. The art's tab strip is blank: the row is built

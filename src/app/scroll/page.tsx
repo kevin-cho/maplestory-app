@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { EquipInventory } from "@/components/inventory/equip-inventory";
 import { ItemInventory } from "@/components/inventory/item-inventory";
-import { equipSlotFor } from "@/data/inventory-layout";
+import { wearItems } from "@/data/inventory-layout";
 import { equipSlotItem, getSampleItem, scrollSlotItem } from "@/data/items";
 import { getTool } from "@/data/tools";
 
@@ -21,13 +21,9 @@ const WORN = [
 const EQUIP_TAB = [1302020, 1332025, 1382009, 1452022, 1472030];
 const USE_TAB = [2040001, 2040002, 2044501, 2049100, 2040727];
 
+// Throws if an item has no slot or two items need the same one
 const equipped = Object.fromEntries(
-  WORN.map((id) => {
-    const item = getSampleItem(id);
-    const slot = equipSlotFor(item.islots);
-    if (!slot) throw new Error(`No equip slot for ${item.name}`);
-    return [slot, equipSlotItem(item)];
-  }),
+  Object.entries(wearItems(WORN.map(getSampleItem))).map(([slot, item]) => [slot, equipSlotItem(item)]),
 );
 
 export default function Page() {

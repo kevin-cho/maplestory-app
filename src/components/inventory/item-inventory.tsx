@@ -3,6 +3,7 @@
 import { useId, useRef, useState, type KeyboardEvent } from "react";
 import {
   ITEM_GRID_SLOTS,
+  checkTabsFit,
   inventoryAsset,
   itemGrid,
   itemTabs,
@@ -23,7 +24,8 @@ const tabPiece = (name: string) => inventoryAsset(`tabs/frame-${name}.png`);
  * The Item Inventory: five tabs of items, a 4 × 6 grid of slots, and mesos.
  * Each tab's items fill its slots in order. The app never needs more than 24
  * per tab, so there's no scrolling: the scrollbar is always greyed out, as in
- * the game when everything fits, and any items past 24 aren't shown.
+ * the game when everything fits. More than 24 items in a tab throws, so items
+ * can't quietly go missing.
  */
 export function ItemInventory({
   items,
@@ -34,6 +36,7 @@ export function ItemInventory({
   mesos: number;
   initialTab?: ItemTabId;
 }) {
+  checkTabsFit(items);
   const [selected, setSelected] = useState<ItemTabId>(initialTab);
   const id = useId();
   const tabRefs = useRef<Partial<Record<ItemTabId, HTMLButtonElement | null>>>({});
